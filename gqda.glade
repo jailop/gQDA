@@ -69,19 +69,21 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkMenuItem">
+                      <object class="GtkMenuItem" id="mProjectOpen">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">_Open</property>
                         <property name="use_underline">True</property>
+                        <signal name="activate" handler="on_project_open" swapped="no"/>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkMenuItem">
+                      <object class="GtkMenuItem" id="mProjectSave">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">_Save</property>
                         <property name="use_underline">True</property>
+                        <signal name="activate" handler="on_project_save" swapped="no"/>
                       </object>
                     </child>
                     <child>
