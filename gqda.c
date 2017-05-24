@@ -6,6 +6,7 @@
 #include <libxml/encoding.h>
 #include "utils.h"
 #include "selections.h"
+#include "backend.h"
 
 #define XML_ENCODING "ISO-8859-1"
 
@@ -13,36 +14,6 @@ GtkWidget *window,
           *note_tree,
           *note_view,
           *tag_tree;
-
-enum {
-    NOTE_NAME = 0,
-    NOTE_CONTENT,
-    NOTE_ID,
-    NOTE_COLS
-};
-
-enum {
-    TAG_NAME = 0,
-    TAG_MEMO,
-    TAG_ID,
-    TAG_COLS
-};
-
-struct note_t {
-    char *label;
-    char *content;
-    char *id;
-    char *pos;
-};
-
-GPtrArray *selections = NULL;
-
-unsigned int note_counter = 0;
-unsigned int tag_counter = 0;
-int note_active = -1,
-    tag_active = -1;
-
-char *file = NULL;
 
 int xml_read_note(xmlTextReaderPtr reader, GtkListStore *store)
 {
@@ -89,40 +60,37 @@ int xml_read_tag(xmlTextReaderPtr reader, GtkListStore *store)
     return 1;
 }
 
-
 int xml_open_file(const char *filename)
 {
-#ifdef DEBUG
-    printf("Function: xml_read_file\n");
-#endif
     char *tagname;
     int ret;
-    GtkListStore *store;
-    store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(note_tree))); 
-    gtk_list_store_clear(store);
+    GtkListStore *note_store, *tag_store;
+    note_store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(note_tree))); 
+    gtk_list_store_clear(note_store);
     note_counter = 0;
-    store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tag_tree))); 
-    gtk_list_store_clear(store);
+    tag_store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tag_tree))); 
+    gtk_list_store_clear(tag_store);
     tag_counter = 0;
     xmlTextReaderPtr reader = xmlReaderForFile(filename, NULL, 0);
     ret = xmlTextReaderRead(reader);
     while (ret == 1) {
         tagname = (char *) xmlTextReaderConstName(reader);
         if (strcmp(tagname, "note") == 0 && xmlTextReaderNodeType(reader) == 1) {
-            store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(note_tree))); 
-            xml_read_note(reader, store);
+            xml_read_note(reader, note_store);
         }
         else if (strcmp(tagname, "tag") == 0 && xmlTextReaderNodeType(reader) == 1) {
-            store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tag_tree))); 
-            xml_read_tag(reader, store);
+            xml_read_tag(reader, tag_store);
         }
         else if (strcmp(tagname, "selection") == 0 && xmlTextReaderNodeType(reader) == 1) {
             int note_id, tag_id, start, end;
-            note_id = atoi((char *) xmlTextReaderGetAttribute(reader, BAD_CAST "note_id"));
-            tag_id = atoi((char *) xmlTextReaderGetAttribute(reader, BAD_CAST "tag_id"));
-            start = atoi((char *) xmlTextReaderGetAttribute(reader, BAD_CAST "start"));
-            end = atoi((char *) xmlTextReaderGetAttribute(reader, BAD_CAST "end"));
-            printf("%d %d %d %d\n", note_id, tag_id, start, end);
+            note_id = atoi((char *) xmlTextReaderGetAttribute(reader, 
+                        BAD_CAST "note_id"));
+            tag_id = atoi((char *) xmlTextReaderGetAttribute(reader, 
+                        BAD_CAST "tag_id"));
+            start = atoi((char *) xmlTextReaderGetAttribute(reader, 
+                        BAD_CAST "start"));
+            end = atoi((char *) xmlTextReaderGetAttribute(reader, 
+                        BAD_CAST "end"));
             selection_add(&selections, note_id, tag_id, start, end);
         }
         ret = xmlTextReaderRead(reader);
@@ -134,9 +102,6 @@ int xml_open_file(const char *filename)
 gboolean xml_write_each_note(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
 {
     xmlChar *tmp;
-#ifdef DEBUG
-    printf("Function: xml_write_each_note\n");
-#endif
     xmlTextWriterPtr writer = (xmlTextWriterPtr) data;
     gchar *name;
     gchar *content;
@@ -160,9 +125,6 @@ gboolean xml_write_each_note(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter
 
 int xml_write_notes(xmlTextWriterPtr writer)
 {
-#ifdef DEBUG
-    printf("Function: xml_write_notes\n");
-#endif
     GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(note_tree)); 
     xmlTextWriterStartElement(writer, BAD_CAST "notes");
     gtk_tree_model_foreach(store, xml_write_each_note, writer); 
@@ -173,9 +135,6 @@ int xml_write_notes(xmlTextWriterPtr writer)
 gboolean xml_write_each_tag(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
 {
     xmlChar *tmp;
-#ifdef DEBUG
-    printf("Function: xml_write_each_tag\n");
-#endif
     xmlTextWriterPtr writer = (xmlTextWriterPtr) data;
     gchar *name;
     gchar *memo;
@@ -199,9 +158,6 @@ gboolean xml_write_each_tag(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter 
 
 int xml_write_tags(xmlTextWriterPtr writer)
 {
-#ifdef DEBUG
-    printf("Function: xml_write_tags\n");
-#endif
     GtkTreeModel *store = gtk_tree_view_get_model(GTK_TREE_VIEW(tag_tree)); 
     xmlTextWriterStartElement(writer, BAD_CAST "tags");
     gtk_tree_model_foreach(store, xml_write_each_tag, writer); 
@@ -214,9 +170,6 @@ int xml_write_selections(xmlTextWriterPtr writer)
     int i, j, k;
     GPtrArray *tag, *sel;
     struct selection *s;
-#ifdef DEBUG
-    printf("Function: xml_write_selections\n");
-#endif
     xmlTextWriterStartElement(writer, BAD_CAST "selections");
     for (i = 0; i < selections->len; i++) {
         tag = g_ptr_array_index(selections, i);
@@ -243,17 +196,12 @@ int xml_write_selections(xmlTextWriterPtr writer)
 
 int xml_write_file(const char *filename)
 {
-#ifdef DEBUG
-    printf("Function: write_file %s\n", filename);
-#endif
     xmlTextWriterPtr writer;
-
     writer = xmlNewTextWriterFilename(filename, 0);
     if (writer == NULL) {
-        printf("xmlWriter failure: error creating writer\n");
+        fprintf(stderr, "xmlWriter failure: error creating writer\n");
         return 0;
     }
-
     xmlTextWriterStartDocument(writer, NULL, XML_ENCODING, NULL);
     xmlTextWriterStartElement(writer, BAD_CAST "data");
     xml_write_notes(writer);
@@ -271,6 +219,8 @@ void note_highlight(int note_id, int tag_id)
     GtkTextIter start, end;
     struct selection *sel;
     int i;
+    if (note_id < 0 || tag_id < 0)
+        return;
     if (selections == NULL)
         return;
     GPtrArray *par = selection_get(selections, note_id, tag_id);
@@ -288,7 +238,6 @@ void note_highlight(int note_id, int tag_id)
         }
         gtk_text_iter_set_offset(&start, sel->start);
         gtk_text_iter_set_offset(&end, sel->end);
-        printf("start = %d  end = %d\n", sel->start, sel->end);
         gtk_text_buffer_apply_tag_by_name(buffer, "highlighted" , &start, &end);
     }
 }
@@ -315,7 +264,10 @@ int main(int argc, char **argv)
     gtk_text_buffer_create_tag(buffer, "highlighted", 
             "background", "yellow", NULL);
 
+
     gtk_widget_show_all(window);
+    if (argc > 0)
+        xml_open_file(file);
     gtk_main();
     return 0;
 }
@@ -353,7 +305,6 @@ gboolean on_note_open(GtkWidget *widget, gpointer userdata)
                 -1);  
     }
     gtk_widget_destroy(file_chooser);
-    printf("(%d, %d)\n", note_active, tag_active);
     return FALSE;
 }
 
@@ -363,6 +314,7 @@ gboolean on_quit(GtkWidget *widget, gpointer userdata)
     return FALSE;
 }
 
+/*
 gboolean on_text_view_selection(GtkWidget *widget, gpointer userdata)
 {
     GtkTextBuffer *tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(note_view));
@@ -374,6 +326,7 @@ gboolean on_text_view_selection(GtkWidget *widget, gpointer userdata)
                 gtk_text_iter_get_offset(&end));
     return FALSE;
 }
+*/
 
 gboolean on_note_tree_row_activated(GtkTreeView *tree, GtkTreePath *path, 
         GtkTreeViewColumn *column, gpointer userdata)
@@ -497,7 +450,6 @@ gboolean on_text_highlight(GtkWidget *widget, gpointer data)
     if (is_selected) {
         a = gtk_text_iter_get_offset(&start);
         b = gtk_text_iter_get_offset(&end);
-        printf("(%d, %d)\n", note_active, tag_active);
         selection_add(&selections, note_active, tag_active, a, b);
         gtk_text_buffer_apply_tag_by_name(buffer, "highlighted" , &start, &end);
     }
@@ -509,15 +461,10 @@ void on_note_cell_edited(GtkCellRendererText *renderer,
                          gchar *new_text, 
                          gpointer user_data)
 {
-    printf("path: %s\n", path);
-    printf("text: %s\n", new_text);
 }
 
 gboolean on_tag_add(GtkWidget *widget, gpointer data)
 {
-#ifdef DEBUG
-    printf("Function: on_tag_add\n");
-#endif
     GtkListStore *store;
     GtkTreeIter iter;
     GtkEntry *entry;
@@ -534,6 +481,5 @@ gboolean on_tag_add(GtkWidget *widget, gpointer data)
                 -1);  
         gtk_entry_set_text(entry, "");
     }
-    printf("(%d, %d)\n", note_active, tag_active);
     return FALSE;
 }
