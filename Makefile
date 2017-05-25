@@ -6,8 +6,8 @@ all: gqda
 install: gqda
 	cp gqda /usr/local/bin
 
-gqda: gqda.c utils.o selections.o
-
+uninstall:
+	rm -f /usr/local/bin/gqda
 
 clean:
 	rm -f gqda

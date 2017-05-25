@@ -4,16 +4,149 @@
 #include <libxml/xmlwriter.h>
 #include <libxml/xmlreader.h>
 #include <libxml/encoding.h>
-#include "utils.h"
-#include "selections.h"
-#include "backend.h"
 
-#define XML_ENCODING "ISO-8859-1"
+// define XML_ENCODING "ISO-8859-1"
+#define XML_ENCODING "UTF-8"
 
 GtkWidget *window,
           *note_tree,
           *note_view,
           *tag_tree;
+
+
+enum {
+    NOTE_NAME = 0,
+    NOTE_CONTENT,
+    NOTE_ID,
+    NOTE_COLS
+};
+
+enum {
+    TAG_NAME = 0,
+    TAG_MEMO,
+    TAG_ID,
+    TAG_COLS
+};
+
+struct note_t {
+    char *label;
+    char *content;
+    char *id;
+    char *pos;
+};
+
+GPtrArray *selections = NULL;
+
+unsigned int note_counter = 0;
+unsigned int tag_counter = 0;
+int note_active = -1,
+    tag_active = -1;
+
+char *file = NULL;
+
+struct selection {
+    int start;
+    int end;
+};
+
+char *astrcpy(const char *s)
+{
+    char *ret;
+    int len = strlen(s) + 1;
+    ret = malloc(sizeof(char) * len);
+    strcpy(ret, s);
+    return ret;
+}
+
+void selection_add(GPtrArray **sel, int note_id, int tag_id, int start, int end)
+{
+    GPtrArray *ptr, *tag, *par;
+    ptr = *sel;
+    int i;
+    if (note_id < 0 || tag_id < 0)
+        return;
+    if (ptr == NULL)
+        *sel = ptr = g_ptr_array_new();
+    if (ptr->len <= note_id)
+        for (i = ptr->len; i <= note_id; i++)
+            g_ptr_array_insert(ptr, i, NULL);
+    tag = g_ptr_array_index(ptr, note_id);
+    if (tag == NULL) {
+        tag = g_ptr_array_new();
+        ptr->pdata[note_id] = tag;
+    }
+    if (tag->len <= tag_id)
+        for (i = tag->len; i <= tag_id; i++)
+            g_ptr_array_insert(tag, i, NULL);
+    par = g_ptr_array_index(tag, tag_id);
+    if (par == NULL) {
+        par = g_ptr_array_new();
+        tag->pdata[tag_id] = par;
+    }
+    struct selection *this = malloc(sizeof(struct selection));
+    this->start = start;
+    this->end   = end;
+    g_ptr_array_add(par, this);
+}
+
+GPtrArray *selection_get(GPtrArray *sel, int note_id, int tag_id)
+{
+    int i;
+    GPtrArray *tag;
+    if (sel == NULL) {
+        fprintf(stderr, "Selection pointer is NULL\n");
+        return NULL;
+    }
+    if (sel->len <= note_id)
+        for (i = sel->len; i <= note_id; i++)
+            g_ptr_array_insert(sel, i, NULL);
+    tag = g_ptr_array_index(sel, note_id);
+    if (tag == NULL) {
+        fprintf(stderr, "Par pointer is NULL\n");
+        return NULL;
+    }
+    if (tag->len <= tag_id)
+        for (i = tag->len; i <= tag_id; i++)
+            g_ptr_array_insert(tag, i, NULL);
+    return g_ptr_array_index(tag, tag_id);
+}
+
+void selection_free(GPtrArray *sel)
+{
+    GPtrArray *tag, *par;
+    int i, j, k;
+    for (i = 0; i < sel->len; i++) {
+        tag = g_ptr_array_index(sel, i);
+        for (j = 0; j < tag->len; j++) {
+            par = g_ptr_array_index(tag, j);
+            for (k = 0; k < par->len; k++)
+                free(g_ptr_array_index(par, k));
+            free(par);
+        }
+        free(tag);
+    }
+    free(sel);
+}
+
+gboolean tree_select_first_row(GtkTreeView *tree_view)
+{
+    GtkTreePath *path;
+    GtkTreeViewColumn *column;
+    path = gtk_tree_path_new_from_string("0");
+    if (!path) {
+        fprintf(stderr, "tree_select_first: path new first getting failed\n");
+        return FALSE;
+    }
+    column = gtk_tree_view_get_column(tree_view, 0);
+    if (!column) {
+        fprintf(stderr, "tree_select_first: getting first coloumn failed\n");
+        return FALSE;
+    }
+    gtk_tree_view_set_cursor(tree_view, path, column, TRUE);
+    gtk_tree_view_row_activated(tree_view, path, column);
+    gtk_tree_path_free(path);
+    return TRUE;
+}
 
 int xml_read_note(xmlTextReaderPtr reader, GtkListStore *store)
 {
@@ -75,13 +208,16 @@ int xml_open_file(const char *filename)
     ret = xmlTextReaderRead(reader);
     while (ret == 1) {
         tagname = (char *) xmlTextReaderConstName(reader);
-        if (strcmp(tagname, "note") == 0 && xmlTextReaderNodeType(reader) == 1) {
+        if (strcmp(tagname, "note") == 0 && 
+            xmlTextReaderNodeType(reader) == 1) {
             xml_read_note(reader, note_store);
         }
-        else if (strcmp(tagname, "tag") == 0 && xmlTextReaderNodeType(reader) == 1) {
+        else if (strcmp(tagname, "tag") == 0 && 
+                 xmlTextReaderNodeType(reader) == 1) {
             xml_read_tag(reader, tag_store);
         }
-        else if (strcmp(tagname, "selection") == 0 && xmlTextReaderNodeType(reader) == 1) {
+        else if (strcmp(tagname, "selection") == 0 &&
+                 xmlTextReaderNodeType(reader) == 1) {
             int note_id, tag_id, start, end;
             note_id = atoi((char *) xmlTextReaderGetAttribute(reader, 
                         BAD_CAST "note_id"));
@@ -96,16 +232,19 @@ int xml_open_file(const char *filename)
         ret = xmlTextReaderRead(reader);
     }
     xmlFreeTextReader(reader);
+    if (!tree_select_first_row(GTK_TREE_VIEW(note_tree)))
+        fprintf(stderr, "First row of note tree could not be selected\n");
+    if (!tree_select_first_row(GTK_TREE_VIEW(tag_tree)))
+        fprintf(stderr, "First row of tag tree could not be selected\n");
     return 1;
 }
 
 gboolean xml_write_each_note(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
 {
-    xmlChar *tmp;
-    xmlTextWriterPtr writer = (xmlTextWriterPtr) data;
+    int id;
     gchar *name;
     gchar *content;
-    int id;
+    xmlTextWriterPtr writer = (xmlTextWriterPtr) data;
     gtk_tree_model_get(model, iter,
             NOTE_NAME, &name,
             NOTE_CONTENT, &content,
@@ -113,12 +252,8 @@ gboolean xml_write_each_note(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter
             -1);
     xmlTextWriterStartElement(writer, BAD_CAST "note");
     xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "id", "%d", id);
-    tmp = ConvertInput(name, XML_ENCODING);
-    xmlTextWriterWriteElement(writer, BAD_CAST "name", tmp);
-    xmlFree(tmp);
-    tmp = ConvertInput(content, XML_ENCODING);
-    xmlTextWriterWriteElement(writer, BAD_CAST "content", tmp);
-    xmlFree(tmp);
+    xmlTextWriterWriteElement(writer, BAD_CAST "name", BAD_CAST name);
+    xmlTextWriterWriteElement(writer, BAD_CAST "content", BAD_CAST content);
     xmlTextWriterEndElement(writer);
     return FALSE;
 }
@@ -134,7 +269,6 @@ int xml_write_notes(xmlTextWriterPtr writer)
 
 gboolean xml_write_each_tag(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
 {
-    xmlChar *tmp;
     xmlTextWriterPtr writer = (xmlTextWriterPtr) data;
     gchar *name;
     gchar *memo;
@@ -146,12 +280,8 @@ gboolean xml_write_each_tag(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter 
             -1);
     xmlTextWriterStartElement(writer, BAD_CAST "tag");
     xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "id", "%d", id);
-    tmp = ConvertInput(name, XML_ENCODING);
-    xmlTextWriterWriteElement(writer, BAD_CAST "name", tmp);
-    xmlFree(tmp);
-    tmp = ConvertInput(memo, XML_ENCODING);
-    xmlTextWriterWriteElement(writer, BAD_CAST "memo", tmp);
-    xmlFree(tmp);
+    xmlTextWriterWriteElement(writer, BAD_CAST "name", BAD_CAST name);
+    xmlTextWriterWriteElement(writer, BAD_CAST "memo", BAD_CAST memo);
     xmlTextWriterEndElement(writer);
     return FALSE;
 }
@@ -213,6 +343,8 @@ int xml_write_file(const char *filename)
     return 1;
 }
 
+
+
 void note_highlight(int note_id, int tag_id)
 {
     GtkTextBuffer *buffer;
@@ -242,6 +374,28 @@ void note_highlight(int note_id, int tag_id)
     }
 }
 
+gboolean on_tag_tree_row_activated(GtkTreeView *tree, GtkTreePath *path, 
+        GtkTreeViewColumn *column, gpointer userdata)
+{
+    GtkTreeModel *store =
+        gtk_tree_view_get_model(GTK_TREE_VIEW(tag_tree)); 
+    GtkTreeIter iter;
+    gtk_tree_model_get_iter(store, &iter, path);
+    
+    gchar *name;
+    gchar *memo;
+    guint id;
+    gtk_tree_model_get(store, &iter,
+            TAG_NAME, &name,
+            TAG_MEMO, &memo,
+            TAG_ID, &id,
+            -1);
+
+    tag_active = id;
+    note_highlight(note_active, tag_active);
+    return FALSE;
+}
+
 
 
 int main(int argc, char **argv)
@@ -263,11 +417,12 @@ int main(int argc, char **argv)
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(note_view));
     gtk_text_buffer_create_tag(buffer, "highlighted", 
             "background", "yellow", NULL);
-
+    gtk_text_buffer_create_tag(buffer, "shadowed", 
+            "background", "lightyellow", NULL);
 
     gtk_widget_show_all(window);
     if (argc > 0)
-        xml_open_file(file);
+        xml_open_file(argv[1]);
     gtk_main();
     return 0;
 }
@@ -298,6 +453,7 @@ gboolean on_note_open(GtkWidget *widget, gpointer userdata)
         GtkTreeIter iter;
         char *filename = strrchr(filepath, '/') + 1;
         gtk_list_store_append(note_store, &iter);
+        // note_active = note_counter;
         gtk_list_store_set(note_store, &iter, 
                 NOTE_NAME, filename, 
                 NOTE_CONTENT, s->str, 
@@ -331,51 +487,25 @@ gboolean on_text_view_selection(GtkWidget *widget, gpointer userdata)
 gboolean on_note_tree_row_activated(GtkTreeView *tree, GtkTreePath *path, 
         GtkTreeViewColumn *column, gpointer userdata)
 {
-    GtkTreeModel *note_store =
-        gtk_tree_view_get_model(GTK_TREE_VIEW(note_tree)); 
-    GtkTreeIter iter;
-    gtk_tree_model_get_iter(note_store, &iter, path);
-    
     gchar *name;
     gchar *content;
     guint id;
+    GtkTreeModel *note_store;
+    GtkTreeIter iter;
+    GtkTextBuffer *text_buffer;
+    
+    note_store = gtk_tree_view_get_model(GTK_TREE_VIEW(note_tree)); 
+    gtk_tree_model_get_iter(note_store, &iter, path);
+    
     gtk_tree_model_get(note_store, &iter,
             NOTE_NAME, &name,
             NOTE_CONTENT, &content,
             NOTE_ID, &id,
             -1);
 
-    GtkTextBuffer *tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(note_view));
-    gtk_text_buffer_set_text(tb, content, strlen(content));
+    text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(note_view));
+    gtk_text_buffer_set_text(text_buffer, content, strlen(content));
     note_active = id;
-    // free(name);
-    // free(content);
-    note_highlight(note_active, tag_active);
-    return FALSE;
-}
-
-gboolean on_tag_tree_row_activated(GtkTreeView *tree, GtkTreePath *path, 
-        GtkTreeViewColumn *column, gpointer userdata)
-{
-    GtkTreeModel *store =
-        gtk_tree_view_get_model(GTK_TREE_VIEW(tag_tree)); 
-    GtkTreeIter iter;
-    gtk_tree_model_get_iter(store, &iter, path);
-    
-    gchar *name;
-    gchar *memo;
-    guint id;
-    gtk_tree_model_get(store, &iter,
-            TAG_NAME, &name,
-            TAG_MEMO, &memo,
-            TAG_ID, &id,
-            -1);
-
-    // GtkTextBuffer *tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(note_view));
-    // gtk_text_buffer_set_text(tb, content, strlen(content));
-    tag_active = id;
-    // free(name);
-    //  free(content);
     note_highlight(note_active, tag_active);
     return FALSE;
 }
@@ -461,6 +591,7 @@ void on_note_cell_edited(GtkCellRendererText *renderer,
                          gchar *new_text, 
                          gpointer user_data)
 {
+
 }
 
 gboolean on_tag_add(GtkWidget *widget, gpointer data)
@@ -474,12 +605,14 @@ gboolean on_tag_add(GtkWidget *widget, gpointer data)
     if (strlen(tag_text) > 0) {
         store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tag_tree))); 
         gtk_list_store_append(store, &iter);
+        // tag_active = tag_counter;
         gtk_list_store_set(store, &iter, 
                 TAG_NAME, tag_text, 
                 TAG_MEMO, "", 
                 TAG_ID, tag_counter++, 
                 -1);  
         gtk_entry_set_text(entry, "");
+        
     }
     return FALSE;
 }
