@@ -142,7 +142,7 @@ gboolean tree_select_first_row(GtkTreeView *tree_view)
         fprintf(stderr, "tree_select_first: getting first coloumn failed\n");
         return FALSE;
     }
-    gtk_tree_view_set_cursor(tree_view, path, column, TRUE);
+     gtk_tree_view_set_cursor(tree_view, path, column, TRUE);
     gtk_tree_view_row_activated(tree_view, path, column);
     gtk_tree_path_free(path);
     return TRUE;
@@ -396,8 +396,6 @@ gboolean on_tag_tree_row_activated(GtkTreeView *tree, GtkTreePath *path,
     return FALSE;
 }
 
-
-
 int main(int argc, char **argv)
 {
     GtkTextBuffer *buffer;
@@ -421,8 +419,15 @@ int main(int argc, char **argv)
             "background", "lightyellow", NULL);
 
     gtk_widget_show_all(window);
-    if (argc > 0)
-        xml_open_file(argv[1]);
+    
+    /* if a filename was given on the command line
+     * then the file will be openned
+     */
+    if (argc > 0) {
+        file = argv[1];
+        xml_open_file(file);
+    }
+
     gtk_main();
     return 0;
 }
