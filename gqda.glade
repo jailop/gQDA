@@ -12,11 +12,11 @@
       <column type="gint"/>
     </columns>
   </object>
-  <object class="GtkListStore" id="TagStore">
+  <object class="GtkTreeStore" id="TagStore">
     <columns>
-      <!-- column-name Tags -->
+      <!-- column-name name -->
       <column type="gchararray"/>
-      <!-- column-name Memo -->
+      <!-- column-name memo -->
       <column type="gchararray"/>
       <!-- column-name id -->
       <column type="guint"/>
@@ -466,9 +466,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="model">TagStore</property>
-                            <property name="headers_clickable">False</property>
                             <property name="search_column">0</property>
-                            <property name="enable_grid_lines">horizontal</property>
                             <property name="activate_on_single_click">True</property>
                             <signal name="row-activated" handler="on_tag_tree_row_activated" swapped="no"/>
                             <child internal-child="selection">
@@ -512,7 +510,7 @@
                       <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="spacing">2</property>
+                        <property name="spacing">5</property>
                         <child>
                           <object class="GtkButton">
                             <property name="label">gtk-add</property>
@@ -530,6 +528,20 @@
                         </child>
                         <child>
                           <object class="GtkButton">
+                            <property name="label" translatable="yes">Child</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <signal name="clicked" handler="on_tag_child_add" object="TagEntry" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton">
                             <property name="label">gtk-remove</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -539,7 +551,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>
@@ -593,11 +605,5 @@
     <child type="titlebar">
       <placeholder/>
     </child>
-  </object>
-  <object class="GtkListStore" id="TreeStore">
-    <columns>
-      <!-- column-name ConceptTree -->
-      <column type="gchararray"/>
-    </columns>
   </object>
 </interface>

@@ -35,7 +35,7 @@ int xml_read_note(xmlTextReaderPtr reader, GtkListStore *store)
     return 1;
 }
 
-int xml_read_tag(xmlTextReaderPtr reader, GtkListStore *store)
+int xml_read_tag(xmlTextReaderPtr reader, GtkTreeStore *store)
 {
     gchar *name;
     gchar *memo;
@@ -46,8 +46,8 @@ int xml_read_tag(xmlTextReaderPtr reader, GtkListStore *store)
     xmlTextReaderRead(reader);
     name = astrcpy((char *) xmlTextReaderReadString(reader));
     memo = "";
-    gtk_list_store_append(store, &iter);
-    gtk_list_store_set(store, &iter,
+    gtk_tree_store_append(store, &iter, NULL);
+    gtk_tree_store_set(store, &iter,
         TAG_NAME, name,
         TAG_MEMO, memo,
         TAG_ID, id,
@@ -60,12 +60,13 @@ int xml_open_file(const char *filename)
 {
     char *tagname;
     int ret;
-    GtkListStore *note_store, *tag_store;
+    GtkListStore *note_store;
+    GtkTreeStore *tag_store;
     note_store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(note_tree)));
     gtk_list_store_clear(note_store);
     note_counter = 0;
-    tag_store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tag_tree)));
-    gtk_list_store_clear(tag_store);
+    tag_store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tag_tree)));
+    gtk_tree_store_clear(tag_store);
     tag_counter = 0;
     xmlTextReaderPtr reader = xmlReaderForFile(filename, NULL, 0);
     ret = xmlTextReaderRead(reader);
@@ -269,6 +270,7 @@ void note_highlight_segment(GtkTextBuffer *buffer, GPtrArray *par,
             continue;
         gtk_text_iter_set_offset(&start, sel->x1);
         gtk_text_iter_set_offset(&end, sel->x2);
+        gtk_text_buffer_remove_all_tags(buffer, &start, &end);
         gtk_text_buffer_apply_tag_by_name(buffer, hightype , &start, &end);
         if (update_view)
             gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(note_view), &start, 
@@ -282,8 +284,7 @@ void note_highlight(int note_id, int tag_id)
     GtkTextBuffer *buffer;
     GtkTextIter start, end;
     GPtrArray *note, *par;
-    gboolean is_selected, update_view;
-    const char *hightype;
+    gboolean is_selected;
     par = selection_get(selections, note_id, tag_id);
     /* Anyway, the text highlighted is cleaned */
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(note_view));
@@ -299,11 +300,13 @@ void note_highlight(int note_id, int tag_id)
         return;
     is_selected = gtk_text_buffer_get_selection_bounds(buffer, &start, &end);
     for (i = 0; i < note->len; i++) {
-        hightype = (i == tag_id) ? "highlighted" : "shadowed";
+        if (i == tag_id)
+            continue;
         par = g_ptr_array_index(note, i); 
-        update_view = (i == tag_id) && !is_selected;
-        note_highlight_segment(buffer, par, hightype, update_view);
+        note_highlight_segment(buffer, par, "shadowed", !is_selected);
     }
+    par = g_ptr_array_index(note, tag_id);
+    note_highlight_segment(buffer, par, "highlighted", !is_selected);
 }
 
 gboolean on_tag_tree_row_activated(GtkTreeView *tree, GtkTreePath *path,
@@ -546,10 +549,10 @@ void on_note_cell_edited(GtkCellRendererText *renderer,
 
 }
 
-gboolean on_tag_add(GtkWidget *widget, gpointer data)
+gboolean tag_add(GtkWidget *widget, gpointer data, gboolean is_child)
 {
     const gchar *tag_text;
-    GtkListStore *store;
+    GtkTreeStore *store;
     GtkTreeIter iter;
     GtkTreeModel *model;
     GtkEntry *entry;
@@ -567,11 +570,11 @@ gboolean on_tag_add(GtkWidget *widget, gpointer data)
 
     if (strlen(tag_text) > 0) {
         model = gtk_tree_view_get_model(GTK_TREE_VIEW(tag_tree));
-        store = GTK_LIST_STORE(model);
+        store = GTK_TREE_STORE(model);
 
-        gtk_list_store_append(store, &iter);
+        gtk_tree_store_append(store, &iter, NULL);
         tag_active = tag_counter;
-        gtk_list_store_set(store, &iter,
+        gtk_tree_store_set(store, &iter,
                 TAG_NAME, tag_text,
                 TAG_MEMO, "",
                 TAG_ID, tag_counter,
@@ -586,6 +589,16 @@ gboolean on_tag_add(GtkWidget *widget, gpointer data)
         tree_activate_row(GTK_TREE_VIEW(tag_tree), &iter);
     }
     return TRUE;
+}
+
+gboolean on_tag_add(GtkWidget *widget, gpointer data)
+{
+    return tag_add(widget, data, FALSE);
+}
+
+gboolean on_tag_child_add(GtkWidget *widget, gpointer data)
+{
+    return tag_add(widget, data, TRUE);
 }
 
 gboolean tag_tree_view_changed(GtkWidget *widget, gpointer data)
