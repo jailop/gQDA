@@ -111,7 +111,7 @@
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">_Open</property>
                         <property name="use_underline">True</property>
-                        <signal name="activate" handler="on_note_open" swapped="no"/>
+                        <signal name="activate" handler="on_note_add" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -262,26 +262,6 @@
                 <property name="homogeneous">True</property>
               </packing>
             </child>
-            <child>
-              <object class="GtkSeparatorToolItem">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparatorToolItem">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -300,29 +280,36 @@
                 <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkTreeView" id="NoteTree">
+                  <object class="GtkScrolledWindow">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="model">NoteStore</property>
-                    <property name="activate_on_single_click">True</property>
-                    <signal name="row-activated" handler="on_note_tree_row_activated" swapped="no"/>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection"/>
-                    </child>
+                    <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkTreeViewColumn">
-                        <property name="fixed_width">180</property>
-                        <property name="title" translatable="yes">Note</property>
-                        <property name="clickable">True</property>
-                        <property name="reorderable">True</property>
-                        <property name="sort_indicator">True</property>
+                      <object class="GtkTreeView" id="NoteTree">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">NoteStore</property>
+                        <property name="activate_on_single_click">True</property>
+                        <signal name="row-activated" handler="on_note_tree_row_activated" swapped="no"/>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection"/>
+                        </child>
                         <child>
-                          <object class="GtkCellRendererText">
-                            <signal name="edited" handler="on_note_cell_edited" swapped="no"/>
+                          <object class="GtkTreeViewColumn">
+                            <property name="fixed_width">180</property>
+                            <property name="title" translatable="yes">Note</property>
+                            <property name="clickable">True</property>
+                            <property name="reorderable">True</property>
+                            <property name="sort_indicator">True</property>
+                            <child>
+                              <object class="GtkCellRendererText">
+                                <signal name="edited" handler="on_note_cell_edited" swapped="no"/>
+                              </object>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
                           </object>
-                          <attributes>
-                            <attribute name="text">0</attribute>
-                          </attributes>
                         </child>
                       </object>
                     </child>
@@ -345,7 +332,7 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="clicked" handler="on_note_open" swapped="no"/>
+                        <signal name="clicked" handler="on_note_add" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -470,26 +457,36 @@
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkTreeView" id="TagTree">
+                      <object class="GtkScrolledWindow" id="TagScrolledWindow">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="model">TagStore</property>
-                        <property name="activate_on_single_click">True</property>
-                        <signal name="row-activated" handler="on_tag_tree_row_activated" swapped="no"/>
-                        <child internal-child="selection">
-                          <object class="GtkTreeSelection"/>
-                        </child>
+                        <property name="shadow_type">in</property>
                         <child>
-                          <object class="GtkTreeViewColumn">
-                            <property name="title" translatable="yes">Tags</property>
-                            <property name="clickable">True</property>
-                            <property name="reorderable">True</property>
-                            <property name="sort_indicator">True</property>
+                          <object class="GtkTreeView" id="TagTree">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="model">TagStore</property>
+                            <property name="headers_clickable">False</property>
+                            <property name="search_column">0</property>
+                            <property name="enable_grid_lines">horizontal</property>
+                            <property name="activate_on_single_click">True</property>
+                            <signal name="row-activated" handler="on_tag_tree_row_activated" swapped="no"/>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection"/>
+                            </child>
                             <child>
-                              <object class="GtkCellRendererText"/>
-                              <attributes>
-                                <attribute name="text">0</attribute>
-                              </attributes>
+                              <object class="GtkTreeViewColumn">
+                                <property name="title" translatable="yes">Tags</property>
+                                <property name="clickable">True</property>
+                                <property name="reorderable">True</property>
+                                <property name="sort_indicator">True</property>
+                                <child>
+                                  <object class="GtkCellRendererText"/>
+                                  <attributes>
+                                    <attribute name="text">0</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
                             </child>
                           </object>
                         </child>
@@ -554,7 +551,7 @@
                     </child>
                   </object>
                   <packing>
-                    <property name="resize">True</property>
+                    <property name="resize">False</property>
                     <property name="shrink">True</property>
                   </packing>
                 </child>
