@@ -37,22 +37,56 @@ int xml_read_note(xmlTextReaderPtr reader, GtkListStore *store)
 
 int xml_read_tag(xmlTextReaderPtr reader, GtkTreeStore *store)
 {
+    int i;
     gchar *name;
     gchar *memo;
-    GtkTreeIter iter;
+    GtkTreeIter iter; 
+    GtkTreeIter *iter_parent;
+    static GPtrArray *iterarray = NULL;
+    xmlChar *tmp;
     int id;
-    id = atoi((char *) xmlTextReaderGetAttribute(reader, BAD_CAST "id"));
+    int parent;
+    tmp = xmlTextReaderGetAttribute(reader, BAD_CAST "id");
+    id = atoi((char *) tmp);
+    xmlFree(tmp);
+    tmp = xmlTextReaderGetAttribute(reader, BAD_CAST "parent");
+    if (tmp) {
+        parent = atoi((char *) tmp);
+        xmlFree(tmp);
+    }
+    else
+        parent = -1;
     xmlTextReaderRead(reader);
     xmlTextReaderRead(reader);
     name = astrcpy((char *) xmlTextReaderReadString(reader));
     memo = "";
-    gtk_tree_store_append(store, &iter, NULL);
+    if (parent == -1) 
+        gtk_tree_store_append(store, &iter, NULL);
+    else { 
+        iter_parent = g_ptr_array_index(iterarray, parent); 
+        if (iter_parent != NULL)
+            gtk_tree_store_append(store, &iter, iter_parent);
+    }
+    if (iterarray == NULL)
+        iterarray = g_ptr_array_new();
+    if (iterarray->len <= id)
+        for (i = iterarray->len; i <= id; i++)
+            g_ptr_array_insert(iterarray, i, NULL);
+    g_ptr_array_insert(iterarray, id, gtk_tree_iter_copy(&iter));
     gtk_tree_store_set(store, &iter,
         TAG_NAME, name,
         TAG_MEMO, memo,
         TAG_ID, id,
         -1);
     tag_counter++;
+    /*
+    for (i = 0; i < iterarray->len; i++) {
+        iter_parent = g_ptr_array_index(iterarray, i);
+        if (iter_parent)
+            free(iter_parent);
+    }
+    g_ptr_array_free(iterarray, FALSE);
+    */
     return 1;
 }
 
@@ -156,6 +190,9 @@ gboolean xml_write_each_tag(GtkTreeModel *model, GtkTreePath *path,
     int id;
     gchar *name;
     gchar *memo;
+    guint tag_parent;
+    gboolean has_parent;
+    GtkTreeIter parent;
     xmlTextWriterPtr writer;
     writer = (xmlTextWriterPtr) data;
     gtk_tree_model_get(model, iter,
@@ -163,11 +200,17 @@ gboolean xml_write_each_tag(GtkTreeModel *model, GtkTreePath *path,
             TAG_MEMO, &memo,
             TAG_ID, &id,
             -1);
+    tag_parent = -1;
+    has_parent = gtk_tree_model_iter_parent(model, &parent, iter);
+    if (has_parent)
+        gtk_tree_model_get(model, &parent, TAG_ID, &tag_parent, -1);
 #ifdef DEBUG
     printf("xml_write_each tag: name %s id %d\n", name, id);
 #endif
+
     xmlTextWriterStartElement(writer, BAD_CAST "tag");
     xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "id", "%d", id);
+    xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "parent", "%d", tag_parent);
     xmlTextWriterWriteElement(writer, BAD_CAST "name", BAD_CAST name);
     xmlTextWriterWriteElement(writer, BAD_CAST "memo", BAD_CAST memo);
     xmlTextWriterEndElement(writer);
@@ -316,6 +359,8 @@ gboolean on_tag_tree_row_activated(GtkTreeView *tree, GtkTreePath *path,
         gtk_tree_view_get_model(GTK_TREE_VIEW(tag_tree));
     GtkTreeIter iter;
     gtk_tree_model_get_iter(store, &iter, path);
+    tag_iter = iter;
+    tag_iter_set = TRUE;
 
     gchar *name;
     gchar *memo;
@@ -553,9 +598,11 @@ gboolean tag_add(GtkWidget *widget, gpointer data, gboolean is_child)
 {
     const gchar *tag_text;
     GtkTreeStore *store;
-    GtkTreeIter iter;
+    GtkTreeIter iter, parent;
     GtkTreeModel *model;
     GtkEntry *entry;
+    GtkTreePath *path;
+    gint depth;
 
     #ifdef DEBUG
     printf("function: on_add_tag: %p %p\n", widget, data);
@@ -572,13 +619,33 @@ gboolean tag_add(GtkWidget *widget, gpointer data, gboolean is_child)
         model = gtk_tree_view_get_model(GTK_TREE_VIEW(tag_tree));
         store = GTK_TREE_STORE(model);
 
-        gtk_tree_store_append(store, &iter, NULL);
-        tag_active = tag_counter;
+        if (tag_iter_set) {
+            if (is_child) {
+                parent = tag_iter;
+            }
+            else {
+                path = gtk_tree_model_get_path(model, &tag_iter);
+                depth = gtk_tree_path_get_depth(path);  
+                if (depth > 1) {
+                    gtk_tree_path_up(path); 
+                    gtk_tree_model_get_iter(model, &parent, path);
+                }
+            }
+            if (depth > 1)
+                gtk_tree_store_append(store, &iter, &parent);
+            else 
+                gtk_tree_store_append(store, &iter, NULL);
+        }
+        else
+            gtk_tree_store_append(store, &iter, NULL);
+
+
         gtk_tree_store_set(store, &iter,
                 TAG_NAME, tag_text,
                 TAG_MEMO, "",
                 TAG_ID, tag_counter,
                 -1);
+        tag_active = tag_counter;
         tag_counter++;
 
         #ifdef DEBUG

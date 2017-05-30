@@ -67,10 +67,51 @@ void selection_free(GPtrArray *sel)
                 free(g_ptr_array_index(par, k));
             free(par);
         }
-        free(tag);
+        g_ptr_array_free(tag, FALSE);
     }
-    free(sel);
+    g_ptr_array_free(sel, FALSE);
 }
 
+void iter_array_add(GPtrArray **array, int index, GtkTreeIter *iter)
+{
+    int i;
+    GtkTreeIter *cpy;
+    GPtrArray *sel = *array;
+    if (sel == NULL)
+        *array = sel = g_ptr_array_new();
+    if (sel->len <= index) {
+        for (i = sel->len; i <= index; i++)
+            g_ptr_array_add(sel, NULL);
+    }
+    cpy = gtk_tree_iter_copy(iter); 
+#ifdef DEBUG
+    printf("iter_array_add\n");
+#endif
+    g_ptr_array_insert(sel, index, cpy);
+#ifdef DEBUG
+    printf("iter_array_add Adjusting %d %d\n", sel->len, index);
+#endif
+}
 
+GtkTreeIter *iter_array_get(GPtrArray *array, int index)
+{
+#ifdef DEBUG
+    printf("iter_array_get\n");
+#endif
+    if (array == NULL)
+        return NULL;
+    else
+        return g_ptr_array_index(array, index);
+}
 
+void iter_array_free(GPtrArray *array)
+{
+    int i;
+    GtkTreeIter *iter;
+    for (i = 0; i < array->len; i++) {
+        iter = g_ptr_array_index(array, i);
+        if (iter != NULL)
+            free(iter);
+    }
+    g_ptr_array_free(array, FALSE);
+}

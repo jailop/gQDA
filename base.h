@@ -9,6 +9,9 @@ GtkWidget *window,
           *note_view,
           *tag_tree;
 
+GtkTreeIter tag_iter;
+gboolean    tag_iter_set = FALSE;
+
 enum {
     NOTE_NAME = 0,
     NOTE_CONTENT,

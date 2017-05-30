@@ -466,7 +466,9 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="model">TagStore</property>
+                            <property name="reorderable">True</property>
                             <property name="search_column">0</property>
+                            <property name="enable_tree_lines">True</property>
                             <property name="activate_on_single_click">True</property>
                             <signal name="row-activated" handler="on_tag_tree_row_activated" swapped="no"/>
                             <child internal-child="selection">

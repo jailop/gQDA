@@ -2,6 +2,7 @@
 #define _SELECTION_H
 
 #include <glib.h>
+#include <gtk/gtk.h>
 
 struct selection {
     int x1;        /* Offset of the starting position */
@@ -40,6 +41,10 @@ void selection_free(GPtrArray *sel);
  *
  * @param sel : Pointer to the selection structure
  */
+
+void iter_array_add(GPtrArray **array, int index, GtkTreeIter *iter);
+GtkTreeIter *iter_array_get(GPtrArray *array, int index);
+void iter_array_free(GPtrArray *array);
 
 #endif /* SELECTION_H */
 
