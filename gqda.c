@@ -58,9 +58,6 @@ void extract_segments(guint id)
     note_model = gtk_tree_view_get_model(GTK_TREE_VIEW(note_tree));
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(fragment_view));
     gtk_tree_model_foreach(note_model, extract_segment_from_note, &id);
-#ifdef DEBUG
-    printf("extract_segments from note: %s\n", str->str);
-#endif
     gtk_text_buffer_set_text(buffer, str->str, -1);
     g_string_free(str, TRUE);
 }

@@ -616,6 +616,7 @@
                             <property name="can_focus">True</property>
                             <property name="model">TagStore</property>
                             <property name="reorderable">True</property>
+                            <property name="enable_tree_lines">True</property>
                             <property name="activate_on_single_click">True</property>
                             <signal name="row-activated" handler="on_main_tree_row_activated" swapped="no"/>
                             <child internal-child="selection">
@@ -624,6 +625,7 @@
                             <child>
                               <object class="GtkTreeViewColumn">
                                 <property name="title" translatable="yes">Tags</property>
+                                <property name="clickable">True</property>
                                 <child>
                                   <object class="GtkCellRendererText"/>
                                   <attributes>
