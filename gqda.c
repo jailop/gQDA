@@ -21,9 +21,8 @@ gboolean extract_segment_from_note(GtkTreeModel *model, GtkTreePath *path,
     gchar *content;
     guint id, tag;
     struct selection *sel;
-    int length;
-    gchar *start;
     gchar *segment;
+    GtkTextIter start, end;
     tag = (guint) (*(guint *)data);
     gtk_tree_model_get(model, iter,
             NOTE_NAME, &name,
@@ -33,17 +32,21 @@ gboolean extract_segment_from_note(GtkTreeModel *model, GtkTreePath *path,
     GPtrArray *par = selection_get(selections, id, tag);
     if (par == NULL) 
         return FALSE;
+    GtkTextBuffer *aux = gtk_text_buffer_new(NULL);
+    gtk_text_buffer_set_text(aux, content, -1);
+    gtk_text_buffer_get_start_iter(aux, &start);
+    gtk_text_buffer_get_end_iter(aux, &end);
     for (i = 0; i < par->len; i++) {
         sel = g_ptr_array_index(par, i);
         if (sel == NULL)
             continue;
-        length = sel->x2 - sel->x1;
-        start = &content[sel->x1];
-        segment = malloc(sizeof(char) * (length + 2));
-        g_strlcpy(segment, start, length); 
+        gtk_text_iter_set_offset(&start, sel->x1);
+        gtk_text_iter_set_offset(&end, sel->x2);
+        segment = gtk_text_buffer_get_slice(aux, &start, &end, FALSE);
         g_string_append_printf(str, "Nota: %s\n\n%s\n\n\n", name, segment);
         free(segment);
     }
+    g_object_unref(G_OBJECT(aux));
     return FALSE;
 }
 
