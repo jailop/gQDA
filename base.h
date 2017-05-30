@@ -7,9 +7,12 @@
 GtkWidget *window,
           *note_tree,
           *note_view,
-          *tag_tree;
+          *tag_tree,
+          *main_tree,
+          *fragment_view;
 
 GtkTreeIter tag_iter;
+GtkTreeIter main_iter;
 gboolean    tag_iter_set = FALSE;
 
 enum {
@@ -38,7 +41,8 @@ GPtrArray *selections = NULL;
 unsigned int note_counter = 0;
 unsigned int tag_counter = 0;
 int note_active = -1,
-    tag_active = -1;
+    tag_active = -1,
+    main_active = -1;
 
 char *file = NULL;
 
