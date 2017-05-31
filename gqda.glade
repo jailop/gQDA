@@ -1,7 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.20.0 
+
+Copyright (C) 2017
+
+This file is part of gQDA.
+
+gQDA is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+gQDA is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with gQDA.  If not, see <http://www.gnu.org/licenses/>.
+
+Author: Jaime Lopez <jailop@gmail.com>
+
+-->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <!-- interface-license-type gplv3 -->
+  <!-- interface-name gQDA -->
+  <!-- interface-description Qualitative Data Analysis Application -->
+  <!-- interface-copyright 2017 -->
+  <!-- interface-authors Jaime Lopez <jailop@gmail.com> -->
   <object class="GtkListStore" id="NoteStore">
     <columns>
       <!-- column-name name -->
@@ -277,17 +303,19 @@
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="spacing">5</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
+                    <property name="spacing">3</property>
+                    <property name="baseline_position">top</property>
                     <child>
                       <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="shadow_type">in</property>
+                        <property name="min_content_width">200</property>
                         <child>
                           <object class="GtkTreeView" id="NoteTree">
                             <property name="visible">True</property>
@@ -325,37 +353,34 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkToolbar">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="spacing">5</property>
                         <child>
-                          <object class="GtkButton">
-                            <property name="label">gtk-add</property>
+                          <object class="GtkToolButton">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="use_stock">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">__glade_unnamed_29</property>
+                            <property name="use_underline">True</property>
+                            <property name="stock_id">gtk-add</property>
                             <signal name="clicked" handler="on_note_add" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="homogeneous">True</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton">
-                            <property name="label">gtk-remove</property>
+                          <object class="GtkToolButton">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="use_stock">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">__glade_unnamed_30</property>
+                            <property name="use_underline">True</property>
+                            <property name="stock_id">gtk-delete</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="homogeneous">True</property>
                           </packing>
                         </child>
                       </object>
@@ -376,9 +401,6 @@
                   <object class="GtkPaned">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="position">350</property>
-                    <property name="position_set">True</property>
-                    <property name="wide_handle">True</property>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
@@ -389,6 +411,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="shadow_type">in</property>
+                            <property name="min_content_width">400</property>
                             <child>
                               <object class="GtkTextView" id="NoteView">
                                 <property name="visible">True</property>
@@ -409,37 +432,34 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox">
+                          <object class="GtkToolbar">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="spacing">5</property>
                             <child>
-                              <object class="GtkButton">
-                                <property name="label">gtk-apply</property>
+                              <object class="GtkToolButton">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
-                                <property name="use_stock">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">__glade_unnamed_35</property>
+                                <property name="use_underline">True</property>
+                                <property name="stock_id">gtk-apply</property>
                                 <signal name="clicked" handler="on_text_highlight" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
+                                <property name="homogeneous">True</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButton">
-                                <property name="label">gtk-cancel</property>
+                              <object class="GtkToolButton">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
-                                <property name="use_stock">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">__glade_unnamed_36</property>
+                                <property name="use_underline">True</property>
+                                <property name="stock_id">gtk-cancel</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
+                                <property name="homogeneous">True</property>
                               </packing>
                             </child>
                           </object>
@@ -451,7 +471,7 @@
                         </child>
                       </object>
                       <packing>
-                        <property name="resize">False</property>
+                        <property name="resize">True</property>
                         <property name="shrink">True</property>
                       </packing>
                     </child>
@@ -513,51 +533,48 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox">
+                          <object class="GtkToolbar">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="spacing">5</property>
                             <child>
-                              <object class="GtkButton">
-                                <property name="label">gtk-add</property>
+                              <object class="GtkToolButton">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
-                                <property name="use_stock">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">__glade_unnamed_43</property>
+                                <property name="use_underline">True</property>
+                                <property name="stock_id">gtk-add</property>
                                 <signal name="clicked" handler="on_tag_add" object="TagEntry" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
+                                <property name="homogeneous">True</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButton">
-                                <property name="label" translatable="yes">Child</property>
+                              <object class="GtkToolButton">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">__glade_unnamed_44</property>
+                                <property name="use_underline">True</property>
+                                <property name="stock_id">gtk-indent</property>
                                 <signal name="clicked" handler="on_tag_child_add" object="TagEntry" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
+                                <property name="homogeneous">True</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButton">
-                                <property name="label">gtk-remove</property>
+                              <object class="GtkToolButton">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
-                                <property name="use_stock">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">__glade_unnamed_45</property>
+                                <property name="use_underline">True</property>
+                                <property name="stock_id">gtk-delete</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
+                                <property name="homogeneous">True</property>
                               </packing>
                             </child>
                           </object>
@@ -569,7 +586,7 @@
                         </child>
                       </object>
                       <packing>
-                        <property name="resize">False</property>
+                        <property name="resize">True</property>
                         <property name="shrink">True</property>
                       </packing>
                     </child>
@@ -655,48 +672,49 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkToolbar">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkButton">
-                            <property name="label" translatable="yes">Add</property>
+                          <object class="GtkToolButton">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">Add a new tag</property>
+                            <property name="label" translatable="yes">Add</property>
+                            <property name="use_underline">True</property>
+                            <property name="stock_id">gtk-add</property>
                             <signal name="clicked" handler="on_main_add" object="TreeEntry" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="homogeneous">True</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton">
-                            <property name="label" translatable="yes">Child</property>
+                          <object class="GtkToolButton">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Child</property>
+                            <property name="use_underline">True</property>
+                            <property name="stock_id">gtk-indent</property>
                             <signal name="clicked" handler="on_main_child_add" object="TreeEntry" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="homogeneous">True</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton">
-                            <property name="label" translatable="yes">Delete</property>
+                          <object class="GtkToolButton">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Delete</property>
+                            <property name="use_underline">True</property>
+                            <property name="stock_id">gtk-delete</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="homogeneous">True</property>
                           </packing>
                         </child>
                       </object>
