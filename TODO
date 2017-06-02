@@ -1,3 +1,4 @@
+Debug invalid characters in xml reading
 Editar el contenido de un tag
 xml_read free memory
 Cómo diferenciar un tag que tiene asociados fragmentos de los que no
