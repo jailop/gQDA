@@ -1,5 +1,5 @@
 #ifndef _SELECTION_H
-#define _SELECTION_H
+#define _SELECTION_H 1
 
 #include <glib.h>
 #include <gtk/gtk.h>

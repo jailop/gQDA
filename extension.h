@@ -1,5 +1,5 @@
 #ifndef _EXTENSION_H
-#define _EXTENSION_H
+#define _EXTENSION_H 1
 
 char *astrcpy(const char *s);
 /* Allocates space in memory and copies an string in it.

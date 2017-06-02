@@ -1,15 +1,25 @@
 #ifndef _BASE_H
-#define _BASE_H
+#define _BASE_H 1
 
 #include <gtk/gtk.h>
 #include "selection.h"
 
-GtkWidget *window,
-          *note_tree,
-          *note_view,
-          *tag_tree,
-          *main_tree,
-          *fragment_view;
+struct gqda_app {
+    GtkWidget *window,
+              *note_tree,
+              *note_view,
+              *tag_tree,
+              *main_tree,
+              *fragment_view;
+    GtkTreeModel *note_model;
+    GPtrArray *selections;
+    unsigned int note_counter;
+    unsigned int tag_counter;
+    int note_active,
+        tag_active,
+        main_active;
+    char *file;
+};
 
 enum {
     NOTE_NAME = 0,
@@ -25,21 +35,13 @@ enum {
     TAG_COLS
 };
 
+/*
 struct note_t {
     char *label;
     char *content;
     char *id;
     char *pos;
 };
-
-GPtrArray *selections = NULL;
-
-unsigned int note_counter = 0;
-unsigned int tag_counter = 0;
-int note_active = -1,
-    tag_active = -1,
-    main_active = -1;
-
-char *file = NULL;
+*/
 
 #endif /* _BASE_H */
