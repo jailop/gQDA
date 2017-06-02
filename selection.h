@@ -36,15 +36,22 @@ GPtrArray *selection_get(GPtrArray *sel, int note_id, int tag_id);
  * @return          Array with selection pointers
  */
 
+struct selection *selection_remove(GPtrArray *sel, int note_id, int tag_id, 
+                                   int cursor_position);
+/* Remove a selection range where cursor_position is between start and end
+ *
+ * @param sel       : Pointer to the selection structure
+ * @param note_id   : Note identifier
+ * @param tag_id    : Tag identifier
+ * @cursor_position : position betwee start and end
+ * @return          : a selection strutcture. Caller must free memory for it
+ */
+
 void selection_free(GPtrArray *sel);
 /* Frees memory used by a selection structure
  *
  * @param sel : Pointer to the selection structure
  */
-
-void iter_array_add(GPtrArray **array, int index, GtkTreeIter *iter);
-GtkTreeIter *iter_array_get(GPtrArray *array, int index);
-void iter_array_free(GPtrArray *array);
 
 #endif /* SELECTION_H */
 

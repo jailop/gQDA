@@ -115,3 +115,24 @@ void iter_array_free(GPtrArray *array)
     }
     g_ptr_array_free(array, FALSE);
 }
+
+struct selection *selection_remove(GPtrArray *sel, int note_id, int tag_id, 
+                                   int cursor_position)
+{
+    gint i;
+    struct selection *ret;
+    GPtrArray *it;
+    it = g_ptr_array_index(sel, note_id);
+    if (!it) return NULL;
+    it = g_ptr_array_index(it, tag_id);
+    if (!it) return NULL;
+    for (i = 0; it->len; i++) {
+        ret = g_ptr_array_index(it, i);
+        if (ret)
+            if (cursor_position >= ret->x1 && cursor_position <= ret->x2) {
+                it->pdata[i] = NULL;
+                return ret;
+            }
+    }
+    return NULL;
+}

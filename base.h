@@ -11,10 +11,6 @@ GtkWidget *window,
           *main_tree,
           *fragment_view;
 
-GtkTreeIter tag_iter;
-GtkTreeIter main_iter;
-gboolean    tag_iter_set = FALSE;
-
 enum {
     NOTE_NAME = 0,
     NOTE_CONTENT,

@@ -442,7 +442,7 @@ Author: Jaime Lopez <jailop@gmail.com>
                                 <property name="label" translatable="yes">__glade_unnamed_35</property>
                                 <property name="use_underline">True</property>
                                 <property name="stock_id">gtk-apply</property>
-                                <signal name="clicked" handler="on_text_highlight" swapped="no"/>
+                                <signal name="clicked" handler="on_text_selection" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -456,6 +456,7 @@ Author: Jaime Lopez <jailop@gmail.com>
                                 <property name="label" translatable="yes">__glade_unnamed_36</property>
                                 <property name="use_underline">True</property>
                                 <property name="stock_id">gtk-cancel</property>
+                                <signal name="clicked" handler="on_text_unselection" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
