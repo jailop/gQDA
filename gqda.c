@@ -403,7 +403,7 @@ gboolean tag_add(GtkWidget *widget, gpointer data,
     GtkEntry *entry;
     GtkTreePath *path;
     GtkTreeSelection *selected_row;
-    gint depth;
+    gint depth = -1;
 
     #ifdef DEBUG
     printf("function: on_add_tag: %p %p\n", widget, data);
