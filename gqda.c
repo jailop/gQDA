@@ -149,7 +149,7 @@ int main(int argc, char **argv)
     GtkTextBuffer *buffer;
 
     gtk_init(&argc, &argv);
-    GtkBuilder *builder = gtk_builder_new_from_file("gqda.glade");
+    GtkBuilder *builder = gtk_builder_new_from_resource("/org/falible/gQDA/gqda.ui");
 
     // Loading global objects
     app.window = GTK_WIDGET(gtk_builder_get_object(builder, "Window"));
