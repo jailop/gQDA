@@ -10,8 +10,11 @@ struct gqda_app {
               *note_view,
               *tag_tree,
               *main_tree,
+              *memo_view,
               *fragment_view;
     GtkTreeModel *note_model;
+    GtkTreeModel *tree_model;
+    GtkTextBuffer *memo_buffer;
     GPtrArray *selections;
     unsigned int note_counter;
     unsigned int tag_counter;

@@ -10,6 +10,53 @@
 */
 #define XML_ENCODING "UTF-8"
 
+xmlChar *ConvertInput(const char *in, const char *encoding)
+{
+    xmlChar *out;
+    int ret;
+    int size;
+    int out_size;
+    int temp;
+    xmlCharEncodingHandlerPtr handler;
+
+    if (in == 0)
+        return 0;
+
+    handler = xmlFindCharEncodingHandler(encoding);
+
+    if (!handler) {
+        printf("ConvertInput: no encoding handler found for '%s'\n",
+                encoding ? encoding : "");
+        return 0;
+    }
+
+    size = (int) strlen(in) + 1;
+    out_size = size * 2 - 1;
+    out = (unsigned char *) xmlMalloc((size_t) out_size);
+
+    if (out != 0) {
+        temp = size - 1;
+        ret = handler->input(out, &out_size, (const xmlChar *) in, &temp);
+        if ((ret < 0) || (temp - size + 1)) {
+            if (ret < 0) {
+                printf("ConvertInput: conversion wasn't successful.\n");
+            } else {
+                printf ("ConvertInput: conversion wasn't successful. converted: %i octets.\n",
+                        temp);
+            }
+
+            xmlFree(out);
+            out = 0;
+        } else {
+            out = (unsigned char *) xmlRealloc(out, out_size + 1);
+            out[out_size] = 0;  /*null terminating out */
+        }
+    } else {
+        printf("ConvertInput: no mem\n");
+    }
+    return out;
+}
+
 static int xml_read_note(xmlTextReaderPtr reader, GtkListStore *store, 
                          struct gqda_app *app)
 {
@@ -20,11 +67,11 @@ static int xml_read_note(xmlTextReaderPtr reader, GtkListStore *store,
     id = atoi((char *) xmlTextReaderGetAttribute(reader, BAD_CAST "id"));
     xmlTextReaderRead(reader);
     xmlTextReaderRead(reader);
-    name = astrcpy((char *) xmlTextReaderReadString(reader));
+    name = (char *) xmlTextReaderReadString(reader);
     xmlTextReaderRead(reader);
     xmlTextReaderRead(reader);
     xmlTextReaderRead(reader);
-    content = astrcpy((char *) xmlTextReaderValue(reader));
+    content = (char *) xmlTextReaderValue(reader);
     gtk_list_store_append(store, &iter);
     gtk_list_store_set(store, &iter,
         NOTE_NAME, name,
@@ -63,7 +110,10 @@ static int xml_read_tag(xmlTextReaderPtr reader, GtkTreeStore *store,
     xmlTextReaderRead(reader);
     xmlTextReaderRead(reader);
     name = (char *) xmlTextReaderReadString(reader);
-    memo = "";
+    xmlTextReaderRead(reader);
+    xmlTextReaderRead(reader);
+    xmlTextReaderRead(reader);
+    memo = (char *) xmlTextReaderReadString(reader);
 
     if (parent < 0) 
         gtk_tree_store_append(store, &iter, NULL);

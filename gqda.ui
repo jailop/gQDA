@@ -28,6 +28,9 @@ Author: Jaime Lopez <jailop@gmail.com>
   <!-- interface-description Qualitative Data Analysis Application -->
   <!-- interface-copyright 2017 -->
   <!-- interface-authors Jaime Lopez <jailop@gmail.com> -->
+  <object class="GtkTextBuffer" id="MemoBuffer">
+    <signal name="changed" handler="on_memo_changed" swapped="no"/>
+  </object>
   <object class="GtkListStore" id="NoteStore">
     <columns>
       <!-- column-name name -->
@@ -38,7 +41,7 @@ Author: Jaime Lopez <jailop@gmail.com>
       <column type="gint"/>
     </columns>
   </object>
-  <object class="GtkTreeStore" id="TagStore">
+  <object class="GtkTreeStore" id="TreeStore">
     <columns>
       <!-- column-name name -->
       <column type="gchararray"/>
@@ -432,35 +435,61 @@ Author: Jaime Lopez <jailop@gmail.com>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToolbar">
+                          <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <child>
-                              <object class="GtkToolButton">
+                              <object class="GtkToolbar">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">__glade_unnamed_35</property>
-                                <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-apply</property>
-                                <signal name="clicked" handler="on_text_selection" swapped="no"/>
+                                <child>
+                                  <object class="GtkToolButton">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">__glade_unnamed_35</property>
+                                    <property name="use_underline">True</property>
+                                    <property name="stock_id">gtk-apply</property>
+                                    <signal name="clicked" handler="on_text_selection" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="homogeneous">True</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkToolButton">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">__glade_unnamed_36</property>
+                                    <property name="use_underline">True</property>
+                                    <property name="stock_id">gtk-cancel</property>
+                                    <signal name="clicked" handler="on_text_unselection" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="homogeneous">True</property>
+                                  </packing>
+                                </child>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkToolButton">
+                              <object class="GtkSearchEntry">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">__glade_unnamed_36</property>
-                                <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-cancel</property>
-                                <signal name="clicked" handler="on_text_unselection" swapped="no"/>
+                                <property name="can_focus">True</property>
+                                <property name="primary_icon_name">edit-find-symbolic</property>
+                                <property name="primary_icon_activatable">False</property>
+                                <property name="primary_icon_sensitive">False</property>
+                                <signal name="search-changed" handler="on_search_changed" object="NoteView" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="homogeneous">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
                               </packing>
                             </child>
                           </object>
@@ -490,7 +519,7 @@ Author: Jaime Lopez <jailop@gmail.com>
                               <object class="GtkTreeView" id="TagTree">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="model">TagStore</property>
+                                <property name="model">TreeStore</property>
                                 <property name="reorderable">True</property>
                                 <property name="search_column">0</property>
                                 <property name="enable_tree_lines">True</property>
@@ -632,7 +661,7 @@ Author: Jaime Lopez <jailop@gmail.com>
                           <object class="GtkTreeView" id="MainTree">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="model">TagStore</property>
+                            <property name="model">TreeStore</property>
                             <property name="reorderable">True</property>
                             <property name="enable_tree_lines">True</property>
                             <property name="activate_on_single_click">True</property>
@@ -732,16 +761,47 @@ Author: Jaime Lopez <jailop@gmail.com>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkScrolledWindow">
+                  <object class="GtkPaned">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="shadow_type">in</property>
+                    <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkTextView" id="FragmentView">
+                      <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="wrap_mode">word</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                          <object class="GtkTextView" id="MemoView">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="buffer">MemoBuffer</property>
+                            <property name="monospace">True</property>
+                          </object>
+                        </child>
                       </object>
+                      <packing>
+                        <property name="resize">False</property>
+                        <property name="shrink">True</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkScrolledWindow">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                          <object class="GtkTextView" id="FragmentView">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="editable">False</property>
+                            <property name="wrap_mode">word</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="resize">True</property>
+                        <property name="shrink">True</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>

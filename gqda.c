@@ -115,15 +115,18 @@ gboolean on_tag_tree_row_activated(GtkTreeView *tree, GtkTreePath *path,
         GtkTreeViewColumn *column, gpointer userdata)
 {
     guint id;
+    const char *memo;
     GtkTreeModel *store =
         gtk_tree_view_get_model(GTK_TREE_VIEW(app.tag_tree));
     GtkTreeIter iter;
     gtk_tree_model_get_iter(store, &iter, path);
 
     gtk_tree_model_get(store, &iter,
+            TAG_MEMO, &memo,
             TAG_ID, &id,
             -1);
     app.tag_active = id;
+    gtk_text_buffer_set_text(app.memo_buffer, memo, -1);
     note_highlight(app.note_active, app.tag_active);
     return FALSE;
 }
@@ -132,15 +135,18 @@ gboolean on_main_tree_row_activated(GtkTreeView *tree, GtkTreePath *path,
         GtkTreeViewColumn *column, gpointer userdata)
 {
     guint id;
+    const char *memo;
     GtkTreeModel *store =
         gtk_tree_view_get_model(GTK_TREE_VIEW(app.tag_tree));
     GtkTreeIter iter;
     gtk_tree_model_get_iter(store, &iter, path);
 
     gtk_tree_model_get(store, &iter,
+            TAG_MEMO, &memo,
             TAG_ID, &id,
             -1);
     extract_segments(id);
+    gtk_text_buffer_set_text(app.memo_buffer, memo, -1);
     return FALSE;
 }
 
@@ -157,6 +163,7 @@ int main(int argc, char **argv)
     app.note_view = GTK_WIDGET(gtk_builder_get_object(builder, "NoteView"));
     app.tag_tree = GTK_WIDGET(gtk_builder_get_object(builder, "TagTree"));
     app.main_tree = GTK_WIDGET(gtk_builder_get_object(builder, "MainTree"));
+    app.memo_view = GTK_WIDGET(gtk_builder_get_object(builder, "MemoView"));
     app.fragment_view = GTK_WIDGET(gtk_builder_get_object(builder, "FragmentView"));
     
     app.selections = NULL;
@@ -168,6 +175,8 @@ int main(int argc, char **argv)
     app.file = NULL;
 
     app.note_model = gtk_tree_view_get_model(GTK_TREE_VIEW(app.note_tree));
+    app.tree_model = gtk_tree_view_get_model(GTK_TREE_VIEW(app.main_tree));
+    app.memo_buffer = GTK_TEXT_BUFFER(gtk_builder_get_object(builder, "MemoBuffer"));
 
     gtk_builder_connect_signals(builder, NULL);
     g_object_unref(G_OBJECT(builder));
@@ -471,5 +480,61 @@ gboolean tag_tree_view_changed(GtkWidget *widget, gpointer data)
     gtk_adjustment_set_value(adj, 
             gtk_adjustment_get_upper(adj) -
             gtk_adjustment_get_page_size(adj));
+    return FALSE;
+}
+
+gboolean on_search_changed(GtkWidget *widget, gpointer data)
+{
+    int found;
+    int cursor_position;
+    const char *text;
+    GtkTextBuffer *buffer;
+    GtkTextView   *view;
+    GtkTextIter start, match_start, match_end;
+    text = gtk_entry_get_text(GTK_ENTRY(widget));
+    if (!text)
+        return FALSE;
+    view = GTK_TEXT_VIEW(data);
+    buffer = gtk_text_view_get_buffer(view);
+    g_object_get(G_OBJECT(buffer), "cursor-position", &cursor_position, NULL);
+    gtk_text_buffer_get_iter_at_offset(buffer, &start, cursor_position);
+    found = gtk_text_iter_forward_search(&start, text, 
+            GTK_TEXT_SEARCH_CASE_INSENSITIVE,
+            &match_start, &match_end, NULL);
+    if (found) {
+        gtk_text_buffer_select_range(buffer, &match_start, &match_end);
+        gtk_text_view_scroll_to_iter(view, &match_start, 0.0, FALSE, 0.0, 0.0);
+    }
+    return FALSE;
+}
+
+gboolean on_search_keypress(GtkWidget *widget, GdkEventKey *ev, gpointer data)
+{
+    switch (ev->keyval) {
+        case GDK_KEY_Return:
+            on_search_changed(widget, data);
+            break;
+    }
+    return FALSE;
+}
+
+gboolean on_memo_changed(GtkTextBuffer *buffer, gpointer data)
+{
+    GtkTreeIter iter;
+    GtkTreeSelection *selected_row;
+    const char *text;
+    GtkTextIter start, end;
+    GtkTreeStore *store;
+    selected_row = gtk_tree_view_get_selection(GTK_TREE_VIEW(app.main_tree));
+    if (!selected_row)
+        return FALSE;
+    gtk_tree_selection_get_selected(selected_row, &(app.tree_model), &iter);
+    gtk_text_buffer_get_start_iter(buffer, &start);
+    gtk_text_buffer_get_end_iter(buffer, &end);
+    text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+    store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(app.main_tree)));
+    gtk_tree_store_set(store, &iter,
+                TAG_MEMO, text,
+                -1);
     return FALSE;
 }
