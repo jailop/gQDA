@@ -403,7 +403,7 @@ gboolean tag_add(GtkWidget *widget, gpointer data,
     GtkEntry *entry;
     GtkTreePath *path;
     GtkTreeSelection *selected_row;
-    gint depth = -1;
+    gint depth = 0;
 
     #ifdef DEBUG
     printf("function: on_add_tag: %p %p\n", widget, data);
@@ -434,8 +434,11 @@ gboolean tag_add(GtkWidget *widget, gpointer data,
                 gtk_tree_model_get_iter(model, &parent, path);
             }
         }
-        if (depth > 1)
+        if (depth > 1 || is_child)
+        {
+    printf("I am here\n");
             gtk_tree_store_append(store, &iter, &parent);
+        }
         else 
             gtk_tree_store_append(store, &iter, NULL);
 
