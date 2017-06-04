@@ -23,6 +23,7 @@ Author: Jaime Lopez <jailop@gmail.com>
 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <requires lib="gtksourceview" version="3.0"/>
   <!-- interface-license-type gplv3 -->
   <!-- interface-name gQDA -->
   <!-- interface-description Qualitative Data Analysis Application -->
@@ -410,21 +411,37 @@ Author: Jaime Lopez <jailop@gmail.com>
                         <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkScrolledWindow">
+                          <object class="GtkFrame">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="shadow_type">in</property>
-                            <property name="min_content_width">400</property>
+                            <property name="can_focus">False</property>
+                            <property name="label_xalign">0</property>
+                            <property name="shadow_type">none</property>
                             <child>
-                              <object class="GtkTextView" id="NoteView">
+                              <object class="GtkScrolledWindow">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="editable">False</property>
-                                <property name="wrap_mode">word</property>
-                                <property name="left_margin">10</property>
-                                <property name="right_margin">10</property>
-                                <property name="top_margin">10</property>
-                                <property name="bottom_margin">10</property>
+                                <property name="shadow_type">in</property>
+                                <property name="min_content_width">400</property>
+                                <child>
+                                  <object class="GtkTextView" id="NoteView">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="editable">False</property>
+                                    <property name="wrap_mode">word</property>
+                                    <property name="left_margin">10</property>
+                                    <property name="right_margin">10</property>
+                                    <property name="top_margin">10</property>
+                                    <property name="bottom_margin">10</property>
+                                    <property name="monospace">True</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child type="label">
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Viewer</property>
                               </object>
                             </child>
                           </object>
@@ -777,11 +794,19 @@ Author: Jaime Lopez <jailop@gmail.com>
                             <property name="can_focus">True</property>
                             <property name="shadow_type">in</property>
                             <child>
-                              <object class="GtkTextView" id="MemoView">
+                              <object class="GtkSourceView" id="MemoView">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="wrap_mode">word</property>
+                                <property name="left_margin">5</property>
+                                <property name="right_margin">5</property>
+                                <property name="top_margin">5</property>
+                                <property name="bottom_margin">5</property>
                                 <property name="buffer">MemoBuffer</property>
-                                <property name="monospace">True</property>
+                                <property name="tab_width">4</property>
+                                <property name="auto_indent">True</property>
+                                <property name="insert_spaces_instead_of_tabs">True</property>
+                                <property name="highlight_current_line">True</property>
                               </object>
                             </child>
                           </object>
@@ -816,6 +841,11 @@ Author: Jaime Lopez <jailop@gmail.com>
                                 <property name="can_focus">True</property>
                                 <property name="editable">False</property>
                                 <property name="wrap_mode">word</property>
+                                <property name="left_margin">5</property>
+                                <property name="right_margin">5</property>
+                                <property name="top_margin">5</property>
+                                <property name="bottom_margin">5</property>
+                                <property name="monospace">True</property>
                               </object>
                             </child>
                           </object>
