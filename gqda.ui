@@ -411,44 +411,103 @@ Author: Jaime Lopez <jailop@gmail.com>
                         <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkFrame">
+                          <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label_xalign">0</property>
-                            <property name="shadow_type">none</property>
+                            <property name="spacing">5</property>
                             <child>
-                              <object class="GtkScrolledWindow">
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <object class="GtkSearchEntry" id="NoteSearch">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="shadow_type">in</property>
-                                <property name="min_content_width">400</property>
-                                <child>
-                                  <object class="GtkTextView" id="NoteView">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="editable">False</property>
-                                    <property name="wrap_mode">word</property>
-                                    <property name="left_margin">10</property>
-                                    <property name="right_margin">10</property>
-                                    <property name="top_margin">10</property>
-                                    <property name="bottom_margin">10</property>
-                                    <property name="monospace">True</property>
-                                  </object>
-                                </child>
+                                <property name="primary_icon_name">edit-find-symbolic</property>
+                                <property name="primary_icon_activatable">False</property>
+                                <property name="primary_icon_sensitive">False</property>
+                                <property name="primary_icon_tooltip_text" translatable="yes">Search in the active note</property>
+                                <property name="placeholder_text" translatable="yes">Search</property>
+                                <signal name="search-changed" handler="on_search_changed" object="NoteView" swapped="no"/>
                               </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
                             </child>
-                            <child type="label">
-                              <object class="GtkLabel">
+                            <child>
+                              <object class="GtkBox">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Viewer</property>
+                                <property name="homogeneous">True</property>
+                                <child>
+                                  <object class="GtkButton">
+                                    <property name="label">gtk-goto-bottom</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="use_stock">True</property>
+                                    <signal name="clicked" handler="on_search_forward" object="NoteSearch" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkButton">
+                                    <property name="label">gtk-go-up</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="use_stock">True</property>
+                                    <signal name="clicked" handler="on_search_backward" object="NoteSearch" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkScrolledWindow">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="shadow_type">in</property>
+                            <property name="min_content_width">400</property>
+                            <child>
+                              <object class="GtkTextView" id="NoteView">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="editable">False</property>
+                                <property name="wrap_mode">word</property>
+                                <property name="left_margin">10</property>
+                                <property name="right_margin">10</property>
+                                <property name="top_margin">10</property>
+                                <property name="bottom_margin">10</property>
+                                <property name="monospace">True</property>
                               </object>
                             </child>
                           </object>
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
@@ -495,25 +554,13 @@ Author: Jaime Lopez <jailop@gmail.com>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSearchEntry">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="primary_icon_name">edit-find-symbolic</property>
-                                <property name="primary_icon_activatable">False</property>
-                                <property name="primary_icon_sensitive">False</property>
-                                <signal name="search-changed" handler="on_search_changed" object="NoteView" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
+                              <placeholder/>
                             </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>
