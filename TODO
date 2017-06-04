@@ -2,3 +2,8 @@ Debug invalid characters in xml reading
 Editar el contenido de un tag
 xml_read free memory
 Cómo diferenciar un tag que tiene asociados fragmentos de los que no
+Update visualización del tree cuando los elementos exceden el área visible
+Cuando se agrega el primer hijo, que la rama se abra en tree view
+Cuando se sombrea sobre una área sombreada, el color siempre queda tenue
+Avisar para guardar antes de salir
+Review saving and restoring with reordered trees

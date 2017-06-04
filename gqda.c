@@ -358,6 +358,8 @@ gboolean on_text_selection(GtkWidget *widget, gpointer data)
         b = gtk_text_iter_get_offset(&end);
         selection_add(&(app.selections), app.note_active, app.tag_active, a, b);
         gtk_text_buffer_apply_tag_by_name(buffer, "highlighted" , &start, &end);
+        /* Unselecting text and moving cursor to end position */
+        gtk_text_buffer_place_cursor(buffer, &end);
     }
     return FALSE;
 }
@@ -435,10 +437,7 @@ gboolean tag_add(GtkWidget *widget, gpointer data,
             }
         }
         if (depth > 1 || is_child)
-        {
-    printf("I am here\n");
             gtk_tree_store_append(store, &iter, &parent);
-        }
         else 
             gtk_tree_store_append(store, &iter, NULL);
 
