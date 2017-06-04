@@ -850,6 +850,7 @@ Author: Jaime Lopez <jailop@gmail.com>
                                 <property name="top_margin">5</property>
                                 <property name="bottom_margin">5</property>
                                 <property name="buffer">MemoBuffer</property>
+                                <property name="monospace">True</property>
                                 <property name="tab_width">4</property>
                                 <property name="auto_indent">True</property>
                                 <property name="insert_spaces_instead_of_tabs">True</property>
