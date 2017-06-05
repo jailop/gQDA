@@ -38,13 +38,4 @@ enum {
     TAG_COLS
 };
 
-/*
-struct note_t {
-    char *label;
-    char *content;
-    char *id;
-    char *pos;
-};
-*/
-
 #endif /* _BASE_H */

@@ -7,3 +7,5 @@ Cuando se agrega el primer hijo, que la rama se abra en tree view
 Cuando se sombrea sobre una área sombreada, el color siempre queda tenue
 Avisar para guardar antes de salir
 Review saving and restoring with reordered trees
+Convert notes List in a Tree
+Guardar archivos en formato serializado ASCII

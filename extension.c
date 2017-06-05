@@ -63,9 +63,6 @@ gboolean tree_activate_row(GtkTreeView *tree_view, GtkTreeIter *iter)
     GtkTreeModel *model;
     GtkTreeViewColumn *column;
 
-    #ifdef DEBUG
-    printf("tree_activate_row: %p %p\n", tree_view, iter);
-    #endif
 
     if (tree_view == NULL) {
         fprintf(stderr, "tree_activate_row: tree_view is NULL");

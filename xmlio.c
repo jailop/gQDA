@@ -146,8 +146,6 @@ static int xml_read_tag(xmlTextReaderPtr reader, GtkTreeStore *store,
     return 1;
 }
 
-
-
 int xml_open(struct gqda_app *app)
 {
     int i;
@@ -220,33 +218,21 @@ static gboolean xml_write_each_note(GtkTreeModel *model, GtkTreePath *path,
             NOTE_CONTENT, &content,
             NOTE_ID, &id,
             -1);
-#ifdef DEBUG
-    printf("xml_write_each_node: it is ready to start writing\n");
-    printf("xml_write_each_node: name %s id %d\n", name, id);
-#endif
     xmlTextWriterStartElement(writer, BAD_CAST "note");
     xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "id", "%d", id);
+    xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "parent", "%d", -1);
     xmlTextWriterWriteAttribute(writer, BAD_CAST "content", BAD_CAST "text");
     xmlTextWriterWriteElement(writer, BAD_CAST "name", BAD_CAST name);
     xmlTextWriterWriteElement(writer, BAD_CAST "content", BAD_CAST content);
     xmlTextWriterEndElement(writer);
-#ifdef DEBUG
-    printf("xml_write_each_node: it is finishing to write\n");
-#endif
     return FALSE;
 }
 
 static int xml_write_notes(xmlTextWriterPtr writer, struct gqda_app *app)
 {
-#ifdef DEBUG
-    printf("xml_write_notes: it is ready to start writing\n");
-#endif
     xmlTextWriterStartElement(writer, BAD_CAST "notes");
     gtk_tree_model_foreach(app->note_model, xml_write_each_note, writer);
     xmlTextWriterEndElement(writer);
-#ifdef DEBUG
-    printf("xml_write_notes: it is finishing to write\n");
-#endif
     return 1;
 }
 
@@ -270,9 +256,6 @@ static gboolean xml_write_each_tag(GtkTreeModel *model, GtkTreePath *path,
     has_parent = gtk_tree_model_iter_parent(model, &parent, iter);
     if (has_parent)
         gtk_tree_model_get(model, &parent, TAG_ID, &tag_parent, -1);
-#ifdef DEBUG
-    printf("xml_write_each tag: name %s id %d\n", name, id);
-#endif
 
     xmlTextWriterStartElement(writer, BAD_CAST "tag");
     xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "id", "%d", id);
@@ -290,9 +273,6 @@ static int xml_write_tags(xmlTextWriterPtr writer, struct gqda_app *app)
     xmlTextWriterStartElement(writer, BAD_CAST "tags");
     gtk_tree_model_foreach(store, xml_write_each_tag, writer);
     xmlTextWriterEndElement(writer);
-#ifdef DEBUG
-    printf("xml_write_tags: it is finishing to write\n");
-#endif
     return 1;
 }
 
@@ -342,9 +322,6 @@ int xml_write(struct gqda_app *app)
         return 0;
     }
     
-#ifdef DEBUG
-    printf("xml_write_file: it is ready to start writing\n");
-#endif
     xmlTextWriterStartDocument(writer, NULL, XML_ENCODING, NULL);
     xmlTextWriterStartElement(writer, BAD_CAST "data");
     xmlTextWriterWriteFormatAttribute(writer, BAD_CAST "version", "%f", 1.0);
@@ -355,9 +332,6 @@ int xml_write(struct gqda_app *app)
         xml_write_tags(writer, app);
     xml_write_selections(writer, app);
 
-#ifdef DEBUG
-    printf("xml_write_file: it is finishing to write\n");
-#endif
     xmlTextWriterEndElement(writer);
     xmlTextWriterEndDocument(writer);
     

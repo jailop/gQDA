@@ -111,42 +111,42 @@ void note_highlight(int note_id, int tag_id)
     note_highlight_segment(buffer, par, "highlighted", !is_selected);
 }
 
-gboolean on_tag_tree_row_activated(GtkTreeView *tree, GtkTreePath *path,
-        GtkTreeViewColumn *column, gpointer userdata)
+gboolean on_tree_row_activated(GtkTreeView *tree, GtkTreePath *path,
+        gboolean is_main)
 {
     guint id;
-    const char *memo;
-    GtkTreeModel *store =
-        gtk_tree_view_get_model(GTK_TREE_VIEW(app.tag_tree));
+    char *memo = NULL;
     GtkTreeIter iter;
+    GtkTreeModel *store =
+        gtk_tree_view_get_model(GTK_TREE_VIEW(tree));
     gtk_tree_model_get_iter(store, &iter, path);
-
     gtk_tree_model_get(store, &iter,
             TAG_MEMO, &memo,
             TAG_ID, &id,
             -1);
     app.tag_active = id;
-    gtk_text_buffer_set_text(app.memo_buffer, memo, -1);
-    note_highlight(app.note_active, app.tag_active);
+    if (is_main) {
+        if (!memo)
+            memo = "";
+        gtk_text_buffer_set_text(app.memo_buffer, memo, -1);
+        extract_segments(id);
+    }
+    else
+        note_highlight(app.note_active, app.tag_active);
     return FALSE;
 }
 
-gboolean on_main_tree_row_activated(GtkTreeView *tree, GtkTreePath *path,
+gboolean on_main_row_activated(GtkTreeView *tree, GtkTreePath *path,
         GtkTreeViewColumn *column, gpointer userdata)
 {
-    guint id;
-    const char *memo;
-    GtkTreeModel *store =
-        gtk_tree_view_get_model(GTK_TREE_VIEW(app.tag_tree));
-    GtkTreeIter iter;
-    gtk_tree_model_get_iter(store, &iter, path);
+    on_tree_row_activated(tree, path, TRUE);
+    return FALSE;
+}
 
-    gtk_tree_model_get(store, &iter,
-            TAG_MEMO, &memo,
-            TAG_ID, &id,
-            -1);
-    extract_segments(id);
-    gtk_text_buffer_set_text(app.memo_buffer, memo, -1);
+gboolean on_tag_row_activated(GtkTreeView *tree, GtkTreePath *path,
+        GtkTreeViewColumn *column, gpointer userdata)
+{
+    on_tree_row_activated(tree, path, FALSE);
     return FALSE;
 }
 
@@ -176,7 +176,7 @@ int main(int argc, char **argv)
 
     app.note_model = gtk_tree_view_get_model(GTK_TREE_VIEW(app.note_tree));
     app.tree_model = gtk_tree_view_get_model(GTK_TREE_VIEW(app.main_tree));
-    app.memo_buffer = GTK_TEXT_BUFFER(gtk_builder_get_object(builder, "MemoBuffer"));
+    app.memo_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(app.memo_view)); 
 
     gtk_builder_connect_signals(builder, NULL);
     g_object_unref(G_OBJECT(builder));
@@ -324,9 +324,6 @@ gboolean on_project_save_as(GtkWidget *widget, gpointer data)
         if (app.file)
             g_free(app.file);
         app.file = gtk_file_chooser_get_filename(file_chooser);
-        #ifdef DEBUG
-        printf("function: on_project save as: filename %s\n", app.file);
-        #endif
         xml_write(&app);  /* All is ok, so write it */
     }
     /* Cleaning up */
@@ -407,16 +404,10 @@ gboolean tag_add(GtkWidget *widget, gpointer data,
     GtkTreeSelection *selected_row;
     gint depth = 0;
 
-    #ifdef DEBUG
-    printf("function: on_add_tag: %p %p\n", widget, data);
-    #endif
 
     entry = GTK_ENTRY (data);
     text = gtk_entry_get_text (entry);
 
-    #ifdef DEBUG
-    printf("on_add_tag: text %s\n", text);
-    #endif
 
     if (strlen(text) > 0) {
         model = gtk_tree_view_get_model(tree_view);

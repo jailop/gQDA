@@ -37,18 +37,14 @@ GPtrArray *selection_get(GPtrArray *sel, int note_id, int tag_id)
 {
     int i;
     GPtrArray *tag;
-    if (sel == NULL) {
-        fprintf(stderr, "Selection pointer is NULL\n");
+    if (sel == NULL)
         return NULL;
-    }
     if (sel->len <= note_id)
         for (i = sel->len; i <= note_id; i++)
             g_ptr_array_insert(sel, i, NULL);
     tag = g_ptr_array_index(sel, note_id);
-    if (tag == NULL) {
-        fprintf(stderr, "Par pointer is NULL\n");
+    if (tag == NULL)
         return NULL;
-    }
     if (tag->len <= tag_id)
         for (i = tag->len; i <= tag_id; i++)
             g_ptr_array_insert(tag, i, NULL);
@@ -84,20 +80,11 @@ void iter_array_add(GPtrArray **array, int index, GtkTreeIter *iter)
             g_ptr_array_add(sel, NULL);
     }
     cpy = gtk_tree_iter_copy(iter); 
-#ifdef DEBUG
-    printf("iter_array_add\n");
-#endif
     g_ptr_array_insert(sel, index, cpy);
-#ifdef DEBUG
-    printf("iter_array_add Adjusting %d %d\n", sel->len, index);
-#endif
 }
 
 GtkTreeIter *iter_array_get(GPtrArray *array, int index)
 {
-#ifdef DEBUG
-    printf("iter_array_get\n");
-#endif
     if (array == NULL)
         return NULL;
     else
