@@ -29,9 +29,6 @@ Author: Jaime Lopez <jailop@gmail.com>
   <!-- interface-description Qualitative Data Analysis Application -->
   <!-- interface-copyright 2017 -->
   <!-- interface-authors Jaime Lopez <jailop@gmail.com> -->
-  <object class="GtkTextBuffer" id="MemoBuffer">
-    <signal name="changed" handler="on_memo_changed" swapped="no"/>
-  </object>
   <object class="GtkListStore" id="NoteStore">
     <columns>
       <!-- column-name name -->
@@ -849,7 +846,6 @@ Author: Jaime Lopez <jailop@gmail.com>
                                 <property name="right_margin">5</property>
                                 <property name="top_margin">5</property>
                                 <property name="bottom_margin">5</property>
-                                <property name="buffer">MemoBuffer</property>
                                 <property name="monospace">True</property>
                                 <property name="tab_width">4</property>
                                 <property name="auto_indent">True</property>

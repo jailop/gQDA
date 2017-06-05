@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
+#include <gtksourceview/gtksource.h>
 #include "extension.h"
 #include "base.h"
 #include "xmlio.h"
@@ -128,7 +129,7 @@ gboolean on_tree_row_activated(GtkTreeView *tree, GtkTreePath *path,
     if (is_main) {
         if (!memo)
             memo = "";
-        gtk_text_buffer_set_text(app.memo_buffer, memo, -1);
+        gtk_text_buffer_set_text(GTK_TEXT_BUFFER(app.memo_buffer), memo, -1);
         extract_segments(id);
     }
     else
@@ -176,8 +177,17 @@ int main(int argc, char **argv)
 
     app.note_model = gtk_tree_view_get_model(GTK_TREE_VIEW(app.note_tree));
     app.tree_model = gtk_tree_view_get_model(GTK_TREE_VIEW(app.main_tree));
-    app.memo_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(app.memo_view)); 
+    app.memo_buffer = gtk_source_buffer_new(NULL);
+    gtk_text_view_set_buffer(GTK_TEXT_VIEW(app.memo_view), GTK_TEXT_BUFFER(app.memo_buffer));
 
+    // Language installation for memos: Markdown
+    GtkSourceLanguageManager *lm = gtk_source_language_manager_new();
+    GtkSourceLanguage *markdown = gtk_source_language_manager_guess_language(lm,
+            "resource:///org/falible/gQDA/third-parties/markdown.lang", "text/xml");
+    gtk_source_buffer_set_language(app.memo_buffer, markdown);
+    gtk_source_buffer_set_highlight_syntax(app.memo_buffer, TRUE); 
+
+    // Activating signals and handlers
     gtk_builder_connect_signals(builder, NULL);
     g_object_unref(G_OBJECT(builder));
 

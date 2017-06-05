@@ -2,5 +2,6 @@
 <gresources>
     <gresource prefix="/org/falible/gQDA">
         <file compressed="true">gqda.ui</file>
+        <file compressed="true">third-parties/markdown.lang</file>
     </gresource>
 </gresources>
