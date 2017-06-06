@@ -120,7 +120,7 @@ static int xml_read_tag(xmlTextReaderPtr reader, GtkTreeStore *store,
 
     if (parent < 0) 
         gtk_tree_store_append(store, &iter, NULL);
-    else { 
+    else {
         row_reference = p_array_get(iters, parent);
         printf("<< %d %p\n", id, row_reference);
         if (row_reference != NULL) {
@@ -201,8 +201,8 @@ int xml_open(struct gqda_app *app)
     xmlFreeTextReader(reader);
 
     tree_activate_first_row(GTK_TREE_VIEW(app->note_tree));
-    tree_activate_first_row(GTK_TREE_VIEW(app->tag_tree));
-    tree_activate_first_row(GTK_TREE_VIEW(app->main_tree));
+    //tree_activate_first_row(GTK_TREE_VIEW(app->tag_tree));
+    //tree_activate_first_row(GTK_TREE_VIEW(app->main_tree));
     gtk_tree_view_expand_all(GTK_TREE_VIEW(app->tag_tree));
     gtk_tree_view_expand_all(GTK_TREE_VIEW(app->main_tree));
 

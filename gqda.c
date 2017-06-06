@@ -591,4 +591,14 @@ gboolean on_search_backward(GtkWidget *widget, gpointer data)
     return FALSE;
 }
 
-
+void on_edited_renderer_cell(GtkCellRendererText *cell, gchar *path, gchar *new_text, 
+        gpointer data)
+{
+    GtkTreeView *tree;
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+    tree = GTK_TREE_VIEW(data);
+    model = gtk_tree_view_get_model(tree);
+    gtk_tree_model_get_iter_from_string(model, &iter, path);
+    gtk_tree_store_set(GTK_TREE_STORE(model), &iter, TAG_NAME, new_text, -1);
+}

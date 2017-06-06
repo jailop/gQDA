@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "util.h"
 
-#define P_ARRAY_SIZE 2048
+#define P_ARRAY_SIZE 1024
 
 char *astrcpy(const char *s)
 {

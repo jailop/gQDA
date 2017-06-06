@@ -329,11 +329,13 @@ Author: Jaime Lopez <jailop@gmail.com>
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn">
+                                <property name="sizing">autosize</property>
                                 <property name="fixed_width">180</property>
                                 <property name="title" translatable="yes">Note</property>
                                 <property name="clickable">True</property>
                                 <property name="reorderable">True</property>
                                 <property name="sort_indicator">True</property>
+                                <property name="sort_column_id">0</property>
                                 <child>
                                   <object class="GtkCellRendererText">
                                     <signal name="edited" handler="on_note_cell_edited" swapped="no"/>
@@ -580,8 +582,11 @@ Author: Jaime Lopez <jailop@gmail.com>
                               <object class="GtkTreeView" id="TagTree">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="hscroll_policy">natural</property>
+                                <property name="vscroll_policy">natural</property>
                                 <property name="model">TreeStore</property>
                                 <property name="reorderable">True</property>
+                                <property name="rules_hint">True</property>
                                 <property name="search_column">0</property>
                                 <property name="enable_tree_lines">True</property>
                                 <property name="activate_on_single_click">True</property>
@@ -591,12 +596,17 @@ Author: Jaime Lopez <jailop@gmail.com>
                                 </child>
                                 <child>
                                   <object class="GtkTreeViewColumn">
+                                    <property name="sizing">autosize</property>
                                     <property name="title" translatable="yes">Tags</property>
                                     <property name="clickable">True</property>
                                     <property name="reorderable">True</property>
                                     <property name="sort_indicator">True</property>
+                                    <property name="sort_column_id">0</property>
                                     <child>
-                                      <object class="GtkCellRendererText"/>
+                                      <object class="GtkCellRendererText">
+                                        <property name="editable">True</property>
+                                        <signal name="edited" handler="on_edited_renderer_cell" object="TagTree" swapped="no"/>
+                                      </object>
                                       <attributes>
                                         <attribute name="text">0</attribute>
                                       </attributes>
@@ -724,6 +734,7 @@ Author: Jaime Lopez <jailop@gmail.com>
                             <property name="can_focus">True</property>
                             <property name="model">TreeStore</property>
                             <property name="reorderable">True</property>
+                            <property name="rules_hint">True</property>
                             <property name="enable_tree_lines">True</property>
                             <property name="activate_on_single_click">True</property>
                             <signal name="row-activated" handler="on_main_row_activated" swapped="no"/>
@@ -732,10 +743,17 @@ Author: Jaime Lopez <jailop@gmail.com>
                             </child>
                             <child>
                               <object class="GtkTreeViewColumn">
+                                <property name="sizing">autosize</property>
                                 <property name="title" translatable="yes">Tags</property>
                                 <property name="clickable">True</property>
+                                <property name="reorderable">True</property>
+                                <property name="sort_indicator">True</property>
+                                <property name="sort_column_id">0</property>
                                 <child>
-                                  <object class="GtkCellRendererText"/>
+                                  <object class="GtkCellRendererText">
+                                    <property name="editable">True</property>
+                                    <signal name="edited" handler="on_edited_renderer_cell" object="MainTree" swapped="no"/>
+                                  </object>
                                   <attributes>
                                     <attribute name="text">0</attribute>
                                   </attributes>
