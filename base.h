@@ -2,6 +2,7 @@
 #define _BASE_H 1
 
 #include <gtk/gtk.h>
+#include <gtksourceview/gtksource.h>
 #include "selection.h"
 
 struct gqda_app {

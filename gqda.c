@@ -1,15 +1,34 @@
 #include <stdlib.h>
 #include <string.h>
-#include <gtk/gtk.h>
-#include <gtksourceview/gtksource.h>
-#include "extension.h"
 #include "base.h"
+#include "extension.h"
 #include "xmlio.h"
 
 GString *str;
 
 struct gqda_app app;
 
+gboolean on_memo_changed(GtkTextBuffer *buffer, gpointer data)
+{
+    GtkTreeIter iter;
+    GtkTreeSelection *selected_row;
+    const char *text;
+    GtkTextIter start, end;
+    GtkTreeStore *store;
+    selected_row = gtk_tree_view_get_selection(GTK_TREE_VIEW(app.main_tree));
+    if (!selected_row)
+        return FALSE;
+    gtk_tree_selection_get_selected(selected_row, &(app.tree_model), &iter);
+    gtk_text_buffer_get_start_iter(buffer, &start);
+    gtk_text_buffer_get_end_iter(buffer, &end);
+    text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+    store = GTK_TREE_STORE(gtk_tree_view_get_model(
+        GTK_TREE_VIEW(app.main_tree)));
+    gtk_tree_store_set(store, &iter,
+                TAG_MEMO, text,
+                -1);
+    return FALSE;
+}
 gboolean extract_segment_from_note(GtkTreeModel *model, GtkTreePath *path,
                              GtkTreeIter *iter, gpointer data)
 {
@@ -156,16 +175,24 @@ int main(int argc, char **argv)
     GtkTextBuffer *buffer;
 
     gtk_init(&argc, &argv);
-    GtkBuilder *builder = gtk_builder_new_from_resource("/org/falible/gQDA/gqda.ui");
+    GtkBuilder *builder = gtk_builder_new_from_resource(
+        "/org/falible/gQDA/gqda.ui");
 
     // Loading global objects
-    app.window = GTK_WIDGET(gtk_builder_get_object(builder, "Window"));
-    app.note_tree = GTK_WIDGET(gtk_builder_get_object(builder, "NoteTree"));
-    app.note_view = GTK_WIDGET(gtk_builder_get_object(builder, "NoteView"));
-    app.tag_tree = GTK_WIDGET(gtk_builder_get_object(builder, "TagTree"));
-    app.main_tree = GTK_WIDGET(gtk_builder_get_object(builder, "MainTree"));
-    app.memo_view = GTK_WIDGET(gtk_builder_get_object(builder, "MemoView"));
-    app.fragment_view = GTK_WIDGET(gtk_builder_get_object(builder, "FragmentView"));
+    app.window = GTK_WIDGET(gtk_builder_get_object(builder, 
+        "Window"));
+    app.note_tree = GTK_WIDGET(gtk_builder_get_object(builder, 
+        "NoteTree"));
+    app.note_view = GTK_WIDGET(gtk_builder_get_object(builder, 
+        "NoteView"));
+    app.tag_tree = GTK_WIDGET(gtk_builder_get_object(builder, 
+        "TagTree"));
+    app.main_tree = GTK_WIDGET(gtk_builder_get_object(builder, 
+        "MainTree"));
+    app.memo_view = GTK_WIDGET(gtk_builder_get_object(builder, 
+        "MemoView"));
+    app.fragment_view = GTK_WIDGET(gtk_builder_get_object(builder, 
+        "FragmentView"));
     
     app.selections = NULL;
     app.note_counter = 0;
@@ -178,12 +205,16 @@ int main(int argc, char **argv)
     app.note_model = gtk_tree_view_get_model(GTK_TREE_VIEW(app.note_tree));
     app.tree_model = gtk_tree_view_get_model(GTK_TREE_VIEW(app.main_tree));
     app.memo_buffer = gtk_source_buffer_new(NULL);
-    gtk_text_view_set_buffer(GTK_TEXT_VIEW(app.memo_view), GTK_TEXT_BUFFER(app.memo_buffer));
+    gtk_text_view_set_buffer(GTK_TEXT_VIEW(app.memo_view), 
+        GTK_TEXT_BUFFER(app.memo_buffer));
+    g_signal_connect(G_OBJECT(app.memo_buffer), "changed", 
+            G_CALLBACK(on_memo_changed), NULL);
 
     // Language installation for memos: Markdown
     GtkSourceLanguageManager *lm = gtk_source_language_manager_new();
-    GtkSourceLanguage *markdown = gtk_source_language_manager_guess_language(lm,
-            "resource:///org/falible/gQDA/third-parties/markdown.lang", "text/xml");
+    GtkSourceLanguage *markdown = gtk_source_language_manager_guess_language(
+        lm, "resource:///org/falible/gQDA/third-parties/markdown.lang", 
+        "text/xml");
     gtk_source_buffer_set_language(app.memo_buffer, markdown);
     gtk_source_buffer_set_highlight_syntax(app.memo_buffer, TRUE); 
 
@@ -221,7 +252,8 @@ gboolean on_note_add(GtkWidget *widget, gpointer userdata)
     int res = gtk_dialog_run(GTK_DIALOG(file_chooser));
     if (res == GTK_RESPONSE_ACCEPT)
     {
-        char *filepath = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
+        char *filepath = gtk_file_chooser_get_filename(
+            GTK_FILE_CHOOSER(file_chooser));
         GString *s = g_string_new(NULL);
         FILE *fin = fopen(filepath, "r");
         char c;
@@ -229,11 +261,13 @@ gboolean on_note_add(GtkWidget *widget, gpointer userdata)
             g_string_append_c(s, c);
         fclose(fin);
 
-        GtkTextBuffer *tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(app.note_view));
+        GtkTextBuffer *tb = gtk_text_view_get_buffer(
+            GTK_TEXT_VIEW(app.note_view));
         gtk_text_buffer_set_text(tb, s->str, s->len);
 
         GtkListStore *note_store =
-            GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(app.note_tree)));
+            GTK_LIST_STORE(gtk_tree_view_get_model(
+                GTK_TREE_VIEW(app.note_tree)));
         GtkTreeIter iter;
         char *filename = strrchr(filepath, '/') + 1;
         gtk_list_store_append(note_store, &iter);
@@ -298,7 +332,8 @@ gboolean on_project_open(GtkWidget *widget, gpointer data)
     {
         if (app.file)
             g_free(app.file);
-        app.file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
+        app.file = gtk_file_chooser_get_filename(
+            GTK_FILE_CHOOSER(file_chooser));
         if (app.file == NULL) {
             fprintf(stderr, "Any filename project was given\n");
             return FALSE;
@@ -410,14 +445,12 @@ gboolean tag_add(GtkWidget *widget, gpointer data,
     GtkTreeIter iter;
     GtkTreeModel *model;
     GtkEntry *entry;
-    GtkTreePath *path;
+    GtkTreePath *path = NULL;
     GtkTreeSelection *selected_row;
     gint depth = 0;
 
-
     entry = GTK_ENTRY (data);
     text = gtk_entry_get_text (entry);
-
 
     if (strlen(text) > 0) {
         model = gtk_tree_view_get_model(tree_view);
@@ -425,12 +458,11 @@ gboolean tag_add(GtkWidget *widget, gpointer data,
        
         selected_row = gtk_tree_view_get_selection(tree_view);
         gtk_tree_selection_get_selected(selected_row, &model, &iter);
+        path = gtk_tree_model_get_path(model, &iter);
 
-        if (is_child) {
+        if (is_child)
             parent = iter;
-        }
         else {
-            path = gtk_tree_model_get_path(model, &iter);
             depth = gtk_tree_path_get_depth(path);  
             if (depth > 1) {
                 gtk_tree_path_up(path); 
@@ -442,7 +474,7 @@ gboolean tag_add(GtkWidget *widget, gpointer data,
         else 
             gtk_tree_store_append(store, &iter, NULL);
 
-
+        gtk_tree_view_expand_row(tree_view, path, FALSE);
         gtk_tree_store_set(store, &iter,
                 TAG_NAME, text,
                 TAG_MEMO, "",
@@ -453,7 +485,7 @@ gboolean tag_add(GtkWidget *widget, gpointer data,
         gtk_entry_set_text(entry, "");
         tree_activate_row(tree_view, &iter);
     }
-    return TRUE;
+    return FALSE;
 }
 
 gboolean on_tag_add(GtkWidget *widget, gpointer data)
@@ -559,23 +591,4 @@ gboolean on_search_backward(GtkWidget *widget, gpointer data)
     return FALSE;
 }
 
-gboolean on_memo_changed(GtkTextBuffer *buffer, gpointer data)
-{
-    GtkTreeIter iter;
-    GtkTreeSelection *selected_row;
-    const char *text;
-    GtkTextIter start, end;
-    GtkTreeStore *store;
-    selected_row = gtk_tree_view_get_selection(GTK_TREE_VIEW(app.main_tree));
-    if (!selected_row)
-        return FALSE;
-    gtk_tree_selection_get_selected(selected_row, &(app.tree_model), &iter);
-    gtk_text_buffer_get_start_iter(buffer, &start);
-    gtk_text_buffer_get_end_iter(buffer, &end);
-    text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
-    store = GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(app.main_tree)));
-    gtk_tree_store_set(store, &iter,
-                TAG_MEMO, text,
-                -1);
-    return FALSE;
-}
+

@@ -1,6 +1,8 @@
 #ifndef _EXTENSION_H
 #define _EXTENSION_H 1
 
+#include <gtk/gtk.h>
+
 char *astrcpy(const char *s);
 /* Allocates space in memory and copies an string in it.
  * User must free allocated memory when the copied string

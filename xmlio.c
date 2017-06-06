@@ -4,6 +4,7 @@
 #include <libxml/encoding.h>
 #include "base.h"
 #include "extension.h"
+#include "util.h"
 
 /*
 #define XML_ENCODING "ISO-8859-1"
@@ -78,21 +79,24 @@ static int xml_read_note(xmlTextReaderPtr reader, GtkListStore *store,
         NOTE_CONTENT, content,
         NOTE_ID, id,
         -1);
+    if (id >= app->note_counter)
+        app->note_counter = id + 1;
     app->note_counter++;
     return 1;
 }
 
 static int xml_read_tag(xmlTextReaderPtr reader, GtkTreeStore *store, 
-                        GPtrArray **iters, struct gqda_app *app)
+                        parray_t **iters, struct gqda_app *app)
 {
-    int i;
     int id;
     int parent;
     gchar *name;
     gchar *memo;
     GtkTreeIter iter; 
-    GtkTreeIter *iter_parent;
-    GPtrArray *iterarray = *iters;
+    GtkTreeIter iter_parent;
+    parray_t *iterarray = *iters;
+    GtkTreeRowReference *row_reference;
+    GtkTreePath *row_path;
     xmlChar *tmp;
     
     tmp = xmlTextReaderGetAttribute(reader, BAD_CAST "id");
@@ -118,31 +122,37 @@ static int xml_read_tag(xmlTextReaderPtr reader, GtkTreeStore *store,
     if (parent < 0) 
         gtk_tree_store_append(store, &iter, NULL);
     else { 
-        iter_parent = g_ptr_array_index(iterarray, parent); 
-        if (iter_parent != NULL)
-            gtk_tree_store_append(store, &iter, iter_parent);
-        else
+        row_reference = p_array_get(iterarray, parent);
+        if (row_reference != NULL) {
+            row_path = gtk_tree_row_reference_get_path(row_reference);
+            gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter_parent, row_path);
+            gtk_tree_store_append(store, &iter, &iter_parent);
+        }
+        else {
             gtk_tree_store_append(store, &iter, NULL);
+            printf("Oh oh, it has a parent, but I can found\n");
+            printf("%d %d %s\n", id, parent, name);
+        }
     }
 
-    if (iterarray == NULL)
-        iterarray = *iters = g_ptr_array_new();
-    
-    if (iterarray->len <= id)
-        for (i = iterarray->len; i <= id; i++)
-            g_ptr_array_insert(iterarray, i, NULL);
-    
-    g_ptr_array_insert(iterarray, id, gtk_tree_iter_copy(&iter));
+    if (!iterarray->data[id]) {
+        row_path = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter);
+        row_reference = gtk_tree_row_reference_new(GTK_TREE_MODEL(store), row_path);
+        p_array_set(iterarray, id, row_reference);
+        gtk_tree_path_free(row_path);
+    }
     
     gtk_tree_store_set(store, &iter,
         TAG_NAME, name,
         TAG_MEMO, memo,
         TAG_ID, id,
         -1);
-    
+    if (id >= app->tag_counter)
+        app->tag_counter = id + 1;
     app->tag_counter++;
     
     free(name);
+    free(memo);
     return 1;
 }
 
@@ -153,7 +163,7 @@ int xml_open(struct gqda_app *app)
     int ret;
     GtkListStore *note_store;
     GtkTreeStore *tag_store;
-    GPtrArray *iterarray = NULL;
+    parray_t *iterarray = p_array_new(); 
     note_store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(app->note_tree)));
     gtk_list_store_clear(note_store);
     app->note_counter = 0;
@@ -192,15 +202,17 @@ int xml_open(struct gqda_app *app)
     tree_activate_first_row(GTK_TREE_VIEW(app->note_tree));
     tree_activate_first_row(GTK_TREE_VIEW(app->tag_tree));
     tree_activate_first_row(GTK_TREE_VIEW(app->main_tree));
+    gtk_tree_view_expand_all(GTK_TREE_VIEW(app->tag_tree));
+    gtk_tree_view_expand_all(GTK_TREE_VIEW(app->main_tree));
 
     if (iterarray) {
         for (i = 0; i < iterarray->len; i++) {
-            GtkTreeIter *iter_parent;
-            iter_parent = g_ptr_array_index(iterarray, i);
-            if (iter_parent)
-                gtk_tree_iter_free(iter_parent);
+            GtkTreeRowReference *row_parent;
+            row_parent = p_array_get(iterarray, i);
+            if (row_parent)
+                gtk_tree_row_reference_free(row_parent);
         }
-        g_ptr_array_free(iterarray, FALSE);
+        p_array_free(iterarray);
     }
     return 1;
 }
