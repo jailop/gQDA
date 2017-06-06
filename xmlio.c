@@ -86,7 +86,7 @@ static int xml_read_note(xmlTextReaderPtr reader, GtkListStore *store,
 }
 
 static int xml_read_tag(xmlTextReaderPtr reader, GtkTreeStore *store, 
-                        parray_t **iters, struct gqda_app *app)
+                        parray_t *iters, struct gqda_app *app)
 {
     int id;
     int parent;
@@ -94,7 +94,6 @@ static int xml_read_tag(xmlTextReaderPtr reader, GtkTreeStore *store,
     gchar *memo;
     GtkTreeIter iter; 
     GtkTreeIter iter_parent;
-    parray_t *iterarray = *iters;
     GtkTreeRowReference *row_reference;
     GtkTreePath *row_path;
     xmlChar *tmp;
@@ -122,7 +121,8 @@ static int xml_read_tag(xmlTextReaderPtr reader, GtkTreeStore *store,
     if (parent < 0) 
         gtk_tree_store_append(store, &iter, NULL);
     else { 
-        row_reference = p_array_get(iterarray, parent);
+        row_reference = p_array_get(iters, parent);
+        printf("<< %d %p\n", id, row_reference);
         if (row_reference != NULL) {
             row_path = gtk_tree_row_reference_get_path(row_reference);
             gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter_parent, row_path);
@@ -135,11 +135,12 @@ static int xml_read_tag(xmlTextReaderPtr reader, GtkTreeStore *store,
         }
     }
 
-    if (!iterarray->data[id]) {
+    if (!iters->data[id]) {
         row_path = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter);
         row_reference = gtk_tree_row_reference_new(GTK_TREE_MODEL(store), row_path);
-        p_array_set(iterarray, id, row_reference);
+        p_array_set(iters, id, row_reference);
         gtk_tree_path_free(row_path);
+        printf(">> %d %p\n", id, row_reference);
     }
     
     gtk_tree_store_set(store, &iter,
@@ -180,7 +181,7 @@ int xml_open(struct gqda_app *app)
         }
         else if (strcmp(tagname, "tag") == 0 &&
                  xmlTextReaderNodeType(reader) == 1) {
-            xml_read_tag(reader, tag_store, &iterarray, app);
+            xml_read_tag(reader, tag_store, iterarray, app);
         }
         else if (strcmp(tagname, "selection") == 0 &&
                  xmlTextReaderNodeType(reader) == 1) {

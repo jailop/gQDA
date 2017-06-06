@@ -3,24 +3,6 @@
 #include <string.h>
 #include "extension.h"
 
-char *astrcpy(const char *s)
-{
-    int len;
-    char *ret;
-    if (s == NULL) {
-        fprintf(stderr, "astrcpy: A NULL string was given to copy\n");
-        return NULL;
-    }
-    len = strlen(s) + 1; /* memory lenght to be allocated */
-    ret = malloc(sizeof(char) * len);
-    if (ret == NULL) {
-        fprintf(stderr, "astrcpy: Memory allocation failed\n");
-        return NULL;
-    }
-    strcpy(ret, s); /* finally, string is copied */
-    return ret;
-}
-
 gboolean tree_activate_first_row(GtkTreeView *tree_view)
 {
     GtkTreePath *path;

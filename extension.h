@@ -3,15 +3,6 @@
 
 #include <gtk/gtk.h>
 
-char *astrcpy(const char *s);
-/* Allocates space in memory and copies an string in it.
- * User must free allocated memory when the copied string
- * will be not used anymore.
- *
- * @param s : the string to be copied
- * @return  : the string copied in a new memory space
- */
-
 gboolean tree_activate_first_row(GtkTreeView *tree_view);
 /* Moves cursor to and activates the first row in
  * GtkTreeView widget.
