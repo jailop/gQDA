@@ -1,3 +1,4 @@
+#define _GNU_SOURCE 
 #include <stdlib.h>
 #include <string.h>
 #include "base.h"
@@ -29,6 +30,7 @@ gboolean on_memo_changed(GtkTextBuffer *buffer, gpointer data)
                 -1);
     return FALSE;
 }
+
 gboolean extract_segment_from_note(GtkTreeModel *model, GtkTreePath *path,
                              GtkTreeIter *iter, gpointer data)
 {
@@ -108,7 +110,7 @@ void note_highlight(int note_id, int tag_id)
     GPtrArray *note, *par;
     gboolean is_selected;
     par = selection_get(app.selections, note_id, tag_id);
-    /* Anyway, the text highlighted is cleaned */
+    // Anyway, the text highlighted is cleaned
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(app.note_view));
     gtk_text_buffer_get_start_iter(buffer, &start);
     gtk_text_buffer_get_end_iter(buffer, &end);
@@ -322,6 +324,7 @@ gboolean on_project_new(GtkWidget *widget, gpointer data)
 
 gboolean on_project_open(GtkWidget *widget, gpointer data)
 {
+    char *title;
     GtkWidget *file_chooser = gtk_file_chooser_dialog_new("Open project",
         GTK_WINDOW(app.window), GTK_FILE_CHOOSER_ACTION_OPEN,
         "_Accept", GTK_RESPONSE_ACCEPT,
@@ -339,6 +342,8 @@ gboolean on_project_open(GtkWidget *widget, gpointer data)
             return FALSE;
         }
         xml_open(&app);
+        asprintf(&title, "gQDA - %s", app.file);
+        gtk_window_set_title(GTK_WINDOW(app.window), title);
     }
     gtk_widget_destroy(file_chooser);
     return FALSE;
