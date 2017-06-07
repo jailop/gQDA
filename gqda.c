@@ -133,16 +133,15 @@ void note_highlight(int note_id, int tag_id)
     note_highlight_segment(buffer, par, "highlighted", !is_selected);
 }
 
-gboolean on_tree_row_activated(GtkTreeView *tree, GtkTreePath *path,
-        gboolean is_main)
+gboolean on_tree_row_activated(GtkTreeView *tree, gboolean is_main)
 {
     guint id;
     char *memo = NULL;
     GtkTreeIter iter;
-    GtkTreeModel *store =
-        gtk_tree_view_get_model(GTK_TREE_VIEW(tree));
-    gtk_tree_model_get_iter(store, &iter, path);
-    gtk_tree_model_get(store, &iter,
+    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree));
+    GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
+    gtk_tree_selection_get_selected(selection, &model, &iter);
+    gtk_tree_model_get(model, &iter,
             TAG_MEMO, &memo,
             TAG_ID, &id,
             -1);
@@ -158,17 +157,15 @@ gboolean on_tree_row_activated(GtkTreeView *tree, GtkTreePath *path,
     return FALSE;
 }
 
-gboolean on_main_row_activated(GtkTreeView *tree, GtkTreePath *path,
-        GtkTreeViewColumn *column, gpointer userdata)
+gboolean on_main_cursor_changed(GtkTreeView *tree, gpointer userdata)
 {
-    on_tree_row_activated(tree, path, TRUE);
+    on_tree_row_activated(tree, TRUE);
     return FALSE;
 }
 
-gboolean on_tag_row_activated(GtkTreeView *tree, GtkTreePath *path,
-        GtkTreeViewColumn *column, gpointer userdata)
+gboolean on_tag_cursor_changed(GtkTreeView *tree, gpointer userdata)
 {
-    on_tree_row_activated(tree, path, FALSE);
+    on_tree_row_activated(tree, FALSE);
     return FALSE;
 }
 

@@ -43,9 +43,8 @@ gboolean tree_activate_row(GtkTreeView *tree_view, GtkTreeIter *iter)
 {
     GtkTreePath *path;
     GtkTreeModel *model;
+    GtkTreeSelection *selected_row;
     GtkTreeViewColumn *column;
-
-
     if (tree_view == NULL) {
         fprintf(stderr, "tree_activate_row: tree_view is NULL");
         return FALSE;
@@ -54,17 +53,16 @@ gboolean tree_activate_row(GtkTreeView *tree_view, GtkTreeIter *iter)
         fprintf(stderr, "tree_activate_row: iter is NULL");
         return FALSE;
     }
-
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree_view));
     column = gtk_tree_view_get_column(tree_view, 0);
     if (column == NULL) {
         fprintf(stderr, "tree_select_first: getting first coloumn failed\n");
         return FALSE;
     }
-
+    selected_row = gtk_tree_view_get_selection(tree_view);
     path = gtk_tree_model_get_path(model, iter);
-    gtk_tree_view_set_cursor(tree_view, path, column, TRUE);
-    gtk_tree_view_row_activated(tree_view, path, column);
-
+    gtk_tree_selection_select_path(selected_row, path);
+    // gtk_tree_view_set_cursor(tree_view, path, column, TRUE);
+    // gtk_tree_view_row_activated(tree_view, path, column);
     return TRUE;
 }
