@@ -39,21 +39,23 @@ void on_note_add_sibling(GtkWidget *widget, gpointer data)
     GtkTreePath *path;
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree));
     selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
-    if (!selection) {
-        gtk_tree_store_append(GTK_TREE_STORE(model), &iter, NULL);
-        return;
-    }
     flag = gtk_tree_selection_get_selected(selection, &model, &iter);
-    if (!flag) return;
-    path = gtk_tree_model_get_path(model, &iter); 
-    if (!path) return;
-    flag = gtk_tree_path_up(path);
-    if (flag) {
-        gtk_tree_model_get_iter(model, &parent, path); 
-        gtk_tree_store_append(GTK_TREE_STORE(model), &iter, &parent);
-    }
-    else
+    if (!flag) 
         gtk_tree_store_append(GTK_TREE_STORE(model), &iter, NULL);
+    else {
+        path = gtk_tree_model_get_path(model, &iter); 
+        flag = gtk_tree_path_up(path);
+        if (flag) {
+            printf("I am here\n");
+            gtk_tree_model_get_iter(model, &parent, path); 
+            gtk_tree_store_append(GTK_TREE_STORE(model), &iter, &parent);
+        }
+        else
+            gtk_tree_store_append(GTK_TREE_STORE(model), &iter, NULL);
+    };
+    path = gtk_tree_model_get_path(model, &iter);
+    gtk_tree_view_set_cursor(GTK_TREE_VIEW(tree), path, 
+            gtk_tree_view_get_column(GTK_TREE_VIEW(tree), 0), TRUE);
 }
 
 void on_note_add_child(GtkWidget *widget, gpointer data)
@@ -63,6 +65,16 @@ void on_note_add_child(GtkWidget *widget, gpointer data)
 void on_note_remove(GtkWidget *widget, gpointer data)
 {
     g_print("On File Save\n");
+}
+
+void on_cell_edited(GtkCellRendererText *cell, gchar *path, gchar *text, 
+        gpointer data)
+{
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+    model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree));
+    gtk_tree_model_get_iter_from_string(model, &iter, path);
+    gtk_tree_store_set(GTK_TREE_STORE(model), &iter, LABEL, text, -1);
 }
 
 GtkWidget *prepare_menubar()
@@ -142,6 +154,7 @@ GtkWidget *prepare_tree()
     store = gtk_tree_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
     renderer = gtk_cell_renderer_text_new();
     g_object_set(G_OBJECT(renderer), "editable", TRUE, NULL);
+    g_signal_connect(G_OBJECT(renderer), "edited", G_CALLBACK(on_cell_edited), NULL);
     column = gtk_tree_view_column_new_with_attributes("Notes", renderer, "text", LABEL, NULL);
     tree = gtk_tree_view_new();
     gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
