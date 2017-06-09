@@ -740,6 +740,7 @@ Author: Jaime Lopez <jailop@gmail.com>
                                 <child>
                                   <object class="GtkCellRendererText">
                                     <property name="editable">True</property>
+                                    <property name="placeholder_text">Type tag name</property>
                                     <signal name="edited" handler="on_edited_renderer_cell" object="MainTree" swapped="no"/>
                                   </object>
                                   <attributes>
@@ -845,7 +846,9 @@ Author: Jaime Lopez <jailop@gmail.com>
                                 <property name="tab_width">4</property>
                                 <property name="auto_indent">True</property>
                                 <property name="insert_spaces_instead_of_tabs">True</property>
+                                <property name="show_right_margin">True</property>
                                 <property name="highlight_current_line">True</property>
+                                <property name="smart_backspace">True</property>
                               </object>
                             </child>
                           </object>
@@ -934,6 +937,7 @@ Author: Jaime Lopez <jailop@gmail.com>
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
+            <property name="padding">3</property>
             <property name="position">2</property>
           </packing>
         </child>
@@ -961,5 +965,9 @@ Author: Jaime Lopez <jailop@gmail.com>
     <child type="titlebar">
       <placeholder/>
     </child>
+  </object>
+  <object class="GtkMenu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
   </object>
 </interface>

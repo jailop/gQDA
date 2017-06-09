@@ -1,12 +1,11 @@
-LDLIBS = -L/usr/lib/libxml2 -lxml2 `pkg-config --libs gtk+-3.0 gtksourceview-3.0`
+LDLIBS = -L/usr/lib/libxml2 -lxml2 `pkg-config --libs gtk+-3.0 gtksourceview-3.0 webkitgtk-3.0`
 CFLAGS = -Wall -g  -std=gnu99 -DDEBUG -O2 -export-dynamic -I/usr/include/libxml2 \
-		 `pkg-config --cflags gtk+-3.0 gtksourceview-3.0`
+		 `pkg-config --cflags gtk+-3.0 gtksourceview-3.0 webkitgtk-3.0`
 OBJECT = extension.o base.o selection.o xmlio.o resources.o util.o
-BINARY = gqda
 
-all: $(BINARY)
+all: gqda goutliner
 
-$(BINARY): $(OBJECT)
+gqda: extension.o base.o selection.o xmlio.o resources.o util.o
 
 resources.o: resources.c
 
