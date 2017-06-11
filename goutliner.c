@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 #include <gtksourceview/gtksource.h>
 #include <webkit/webkit.h>
+#include <json-glib/json-glib.h>
 
 enum {
     LABEL = 0,
@@ -8,7 +9,8 @@ enum {
     COUNT
 };
 
-GtkWidget *tree;
+GtkWidget *tree = NULL;
+gchar *filename = "test.json";
 
 void on_window_destroy(GtkWidget *widget, gpointer data)
 {
@@ -27,32 +29,36 @@ void on_file_open(GtkWidget *widget, gpointer data)
 
 void on_file_save(GtkWidget *widget, gpointer data)
 {
-    g_print("On File Save\n");
+    JsonNode *root;
+    root = json_node_new(JSON_NODE_ARRAY);
 }
 
 void on_note_add_sibling(GtkWidget *widget, gpointer data)
 {
     gboolean flag;
+    gint depth;
     GtkTreeModel *model;
     GtkTreeSelection *selection;
     GtkTreeIter iter, parent;
     GtkTreePath *path;
+    
     model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree));
     selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
+    
     flag = gtk_tree_selection_get_selected(selection, &model, &iter);
     if (!flag) 
         gtk_tree_store_append(GTK_TREE_STORE(model), &iter, NULL);
     else {
-        path = gtk_tree_model_get_path(model, &iter); 
-        flag = gtk_tree_path_up(path);
-        if (flag) {
-            printf("I am here\n");
+        depth = gtk_tree_store_iter_depth(GTK_TREE_STORE(model), &iter);
+        if (depth > 0) {
+            path = gtk_tree_model_get_path(model, &iter); 
             gtk_tree_model_get_iter(model, &parent, path); 
             gtk_tree_store_append(GTK_TREE_STORE(model), &iter, &parent);
         }
         else
             gtk_tree_store_append(GTK_TREE_STORE(model), &iter, NULL);
     };
+    
     path = gtk_tree_model_get_path(model, &iter);
     gtk_tree_view_set_cursor(GTK_TREE_VIEW(tree), path, 
             gtk_tree_view_get_column(GTK_TREE_VIEW(tree), 0), TRUE);
@@ -60,6 +66,24 @@ void on_note_add_sibling(GtkWidget *widget, gpointer data)
 
 void on_note_add_child(GtkWidget *widget, gpointer data)
 {
+    gboolean flag;
+    GtkTreeModel *model;
+    GtkTreeSelection *selection;
+    GtkTreeIter iter, parent;
+    GtkTreePath *path;
+    
+    model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree));
+    selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
+    
+    flag = gtk_tree_selection_get_selected(selection, &model, &parent);
+    if (!flag) 
+        gtk_tree_store_append(GTK_TREE_STORE(model), &iter, NULL);
+    else
+        gtk_tree_store_append(GTK_TREE_STORE(model), &iter, &parent);
+    
+    path = gtk_tree_model_get_path(model, &iter);
+    gtk_tree_view_set_cursor(GTK_TREE_VIEW(tree), path, 
+            gtk_tree_view_get_column(GTK_TREE_VIEW(tree), 0), TRUE);
 }
 
 void on_note_remove(GtkWidget *widget, gpointer data)
