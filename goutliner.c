@@ -1,6 +1,5 @@
 #include <gtk/gtk.h>
 #include <gtksourceview/gtksource.h>
-#include <webkit/webkit.h>
 #include <json-glib/json-glib.h>
 
 enum {
@@ -196,7 +195,7 @@ int main(int argc, char **argv)
     GtkWidget *notebook;
     GtkWidget *label;
     GtkWidget *editor;
-    GtkWidget *viewer;
+    // GtkWidget *viewer;
     GtkWidget *statusbar;
     GtkWidget *scrolledwindow;
     gtk_init(&argc, &argv);
@@ -218,9 +217,9 @@ int main(int argc, char **argv)
     gtk_container_add(GTK_CONTAINER(scrolledwindow), editor);
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), scrolledwindow, label);
 
-    viewer = webkit_web_view_new();
-    label = gtk_label_new("View");
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), viewer, label);
+    // viewer = webkit_web_view_new();
+    // label = gtk_label_new("View");
+    // gtk_notebook_append_page(GTK_NOTEBOOK(notebook), viewer, label);
 
     bodybox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     scrolledwindow = gtk_scrolled_window_new(NULL, NULL);
