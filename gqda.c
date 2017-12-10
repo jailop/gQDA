@@ -139,7 +139,8 @@ gboolean on_tree_row_activated(GtkTreeView *tree, gboolean is_main)
     char *memo = NULL;
     GtkTreeIter iter;
     GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree));
-    GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
+    GtkTreeSelection *selection =                     
+        gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
     gtk_tree_selection_get_selected(selection, &model, &iter);
     gtk_tree_model_get(model, &iter,
             TAG_MEMO, &memo,
