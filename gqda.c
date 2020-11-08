@@ -5,7 +5,7 @@
 #include "extension.h"
 #include "xmlio.h"
 
-GString *str;
+// GString *str;
 
 struct gqda_app app;
 
@@ -61,7 +61,7 @@ gboolean extract_segment_from_note(GtkTreeModel *model, GtkTreePath *path,
         gtk_text_iter_set_offset(&start, sel->x1);
         gtk_text_iter_set_offset(&end, sel->x2);
         segment = gtk_text_buffer_get_slice(aux, &start, &end, FALSE);
-        g_string_append_printf(str, "Nota: %s\n\n%s\n\n\n", name, segment);
+        // g_string_append_printf(str, "Nota: %s\n\n%s\n\n\n", name, segment);
         free(segment);
     }
     g_object_unref(G_OBJECT(aux));
@@ -71,7 +71,7 @@ gboolean extract_segment_from_note(GtkTreeModel *model, GtkTreePath *path,
 void extract_segments(guint id)
 {
     GtkTextBuffer *buffer;
-    str = g_string_new(NULL);
+    GString *str = g_string_new(NULL);
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(app.fragment_view));
     gtk_tree_model_foreach(app.note_model, extract_segment_from_note, &id);
     gtk_text_buffer_set_text(buffer, str->str, -1);
