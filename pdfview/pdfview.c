@@ -88,9 +88,9 @@ int main(int argc, char **argv)
         G_CALLBACK(keypress_callback), NULL);
     g_signal_connect(GTK_WIDGET(canvas), "draw", G_CALLBACK(draw_callback), NULL);
     
-    uri = g_strconcat("file://", argv[1], NULL);
+    // uri = g_strconcat("file://", argv[1], NULL);
     
-    doc = poppler_document_new_from_file(uri, NULL, &error);
+    doc = poppler_document_new_from_file(argv[1], NULL, &error);
     if (!doc) {
         fprintf(stderr, "Document could not be openned\n%s\n", error->message);
         exit(EXIT_FAILURE);
