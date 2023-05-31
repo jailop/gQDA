@@ -1,5 +1,5 @@
-#include "doc.h"
 #include <string.h>
+#include "doc.h"
 
 doc_t *doc_new()
 {
@@ -28,8 +28,12 @@ doc_t *doc_new_from_str(const char *s)
     return d;
 }
 
+/* Frees memory used by a doc object */
 void  doc_free(doc_t *d)
 {
-    free(d->data);
-    free(d);
+    if (d != NULL) {
+        if (d->data != NULL)
+            free(d->data);
+        free(d);
+    }
 }

@@ -8,6 +8,7 @@ them and assign tag to fragments. You can build a conceptual tree with tags.
 Requiriments:
 
 - GTK+ 3.0
+- GTK source view 4.0
 - libxml2
 
 Installing and running:
