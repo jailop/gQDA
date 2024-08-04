@@ -1,4 +1,5 @@
 x Review saving and restoring with reordered trees
+fragments are not being shown in tree view
 Debug invalid characters in xml reading
 Editar el contenido de un tag
 xml_read free memory
@@ -16,3 +17,6 @@ Remove tags is not working
 Add keyboard shortcuts
 about dialog
 dialog before closing
+include keyboard-shortcuts
+keep cursor position
+help dialog

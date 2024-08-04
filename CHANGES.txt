@@ -1,0 +1,3 @@
+0.1.1 - 2024-08-04:
+
+* search functions moved to its own file
