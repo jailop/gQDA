@@ -37,7 +37,7 @@ xmlChar *ConvertInput(const char *in, const char *encoding)
 
     if (out != 0) {
         temp = size - 1;
-        ret = handler->input(out, &out_size, (const xmlChar *) in, &temp);
+        ret = handler->input.legacyFunc(out, &out_size, (const xmlChar *) in, &temp);
         if ((ret < 0) || (temp - size + 1)) {
             if (ret < 0) {
                 printf("ConvertInput: conversion wasn't successful.\n");
@@ -122,7 +122,7 @@ static int xml_read_tag(xmlTextReaderPtr reader, GtkTreeStore *store,
         gtk_tree_store_append(store, &iter, NULL);
     else {
         row_reference = p_array_get(iters, parent);
-        printf("<< %d %p\n", id, row_reference);
+        // printf("<< %d %p\n", id, row_reference);
         if (row_reference != NULL) {
             row_path = gtk_tree_row_reference_get_path(row_reference);
             gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter_parent, row_path);
@@ -140,7 +140,7 @@ static int xml_read_tag(xmlTextReaderPtr reader, GtkTreeStore *store,
         row_reference = gtk_tree_row_reference_new(GTK_TREE_MODEL(store), row_path);
         p_array_set(iters, id, row_reference);
         gtk_tree_path_free(row_path);
-        printf(">> %d %p\n", id, row_reference);
+        // printf(">> %d %p\n", id, row_reference);
     }
     
     gtk_tree_store_set(store, &iter,
