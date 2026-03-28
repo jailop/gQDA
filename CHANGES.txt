@@ -5,3 +5,5 @@
 2026-03-27:
 
 * updated to support deprecated functions in lxml library
+* fixed: tree tags where not showing text fragments
+

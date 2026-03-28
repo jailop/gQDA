@@ -32,6 +32,11 @@ gboolean on_memo_changed(GtkTextBuffer *buffer, gpointer data)
     return FALSE;
 }
 
+struct SegmentToExtract {
+    guint id;
+    GString *str;
+};
+
 gboolean extract_segment_from_note(GtkTreeModel *model, GtkTreePath *path,
                              GtkTreeIter *iter, gpointer data)
 {
@@ -42,13 +47,14 @@ gboolean extract_segment_from_note(GtkTreeModel *model, GtkTreePath *path,
     struct selection *sel;
     gchar *segment;
     GtkTextIter start, end;
-    tag = (guint) (*(guint *)data);
+    // tag = (guint) (*(guint *)data);
+    struct SegmentToExtract segm = *(struct SegmentToExtract*) data;
     gtk_tree_model_get(model, iter,
             NOTE_NAME, &name,
             NOTE_CONTENT, &content,
             NOTE_ID, &id,
             -1);
-    GPtrArray *par = selection_get(app.selections, id, tag);
+    GPtrArray *par = selection_get(app.selections, id, segm.id);
     if (par == NULL) 
         return FALSE;
     GtkTextBuffer *aux = gtk_text_buffer_new(NULL);
@@ -62,7 +68,7 @@ gboolean extract_segment_from_note(GtkTreeModel *model, GtkTreePath *path,
         gtk_text_iter_set_offset(&start, sel->x1);
         gtk_text_iter_set_offset(&end, sel->x2);
         segment = gtk_text_buffer_get_slice(aux, &start, &end, FALSE);
-        // g_string_append_printf(str, "Nota: %s\n\n%s\n\n\n", name, segment);
+        g_string_append_printf(segm.str, "Nota: %s\n\n%s\n\n\n", name, segment);
         free(segment);
     }
     g_object_unref(G_OBJECT(aux));
@@ -74,7 +80,10 @@ void extract_segments(guint id)
     GtkTextBuffer *buffer;
     GString *str = g_string_new(NULL);
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(app.fragment_view));
-    gtk_tree_model_foreach(app.note_model, extract_segment_from_note, &id);
+    struct SegmentToExtract segm;
+    segm.id = id;
+    segm.str = str;
+    gtk_tree_model_foreach(app.note_model, extract_segment_from_note, &segm);
     gtk_text_buffer_set_text(buffer, str->str, -1);
     g_string_free(str, TRUE);
 }
